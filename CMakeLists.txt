@@ -81,10 +81,12 @@ set(DMOD_MAL_IMPLS          )
 dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/carhmi.c
     src/player.c
+    src/local_time.c
 )
 
 # libdmview: the display claimed, the channel of the claim (0.10).
 # dmmp3: the MP3 files. libdmaudio: playing them. dmlist: the list of the files.
+# dmutc: the time of the clock.
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.7
     dmosi
@@ -93,6 +95,7 @@ dmod_link_modules(${DMOD_MODULE_NAME}
     dmmp3@>=0.1
     libdmaudio@>=0.1
     dmlist
+    dmutc
 )
 
 enable_testing()

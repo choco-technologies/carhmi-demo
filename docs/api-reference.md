@@ -36,8 +36,18 @@ more - the event `scroll`, +10 (-10) -, carhmi moves the window, and the view
 scrolls its rows back by as many: what is seen stays where it is, and the
 next tracks are below it.
 
+## The clock
+
+The clock of the top bar is the RTC's: carhmi reads dmutc (`dmutc_get()`)
+once a second and shows it as Polish time - UTC+1, UTC+2 from the last
+Sunday of March to the last Sunday of October at 01:00 UTC (the EU rule;
+the RTC keeps UTC). Without an RTC dmutc bound - no `dmutc@<rtc>` service
+running, or its calendar not set - the clock is `--:--`.
+
+## The channel
+
 carhmi and the view talk through the claim's channel (libdmview 0.10;
-the scrolling needs dmview's SCROLLED, 0.13):
+the scrolling needs dmview's SCROLLED, 0.12.1):
 
 | Property | Set by | What it is |
 |----------|--------|------------|
@@ -49,6 +59,7 @@ the scrolling needs dmview's SCROLLED, 0.13):
 | `position`, `duration` | carhmi | Seconds |
 | `progress` | carhmi | 0..1000, the width of the progress bar (`data-dmod-width`) |
 | `rowN.title`, `.artist`, `.time` | carhmi | The twenty rows of the window |
+| `clock` | carhmi | `HH:MM`, local time (`--:--`: not known) |
 
 | Event | Value | What carhmi does |
 |-------|-------|------------------|

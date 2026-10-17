@@ -6,6 +6,13 @@ set(DMOD_PRIORITY           0)
 
 dmod_add_test(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     carhmi_test.c
+    ../src/local_time.c
+)
+target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+
+# dmutc: its calendar conversions (local_time.c)
+dmod_link_modules(${DMOD_MODULE_NAME}
+    dmutc
 )
 
 # Register the test module with ctest - this replays the same two steps CI
