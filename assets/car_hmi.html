@@ -85,18 +85,22 @@
         .row-active .row-artist { color: rgba(129, 140, 248, 0.8); }
         .row-active .row-eq { visibility: visible; }
 
-        /* Głośność: ikona w pasku górnym i panel pod nią (jak widoki: ukryty, dopóki nie ma .open) */
+        /* Głośność: ikona w pasku górnym i panel pod nią, przezroczysty, dopóki nie ma .open. Bez
+           visibility: konwerter maluje wygląd przycisku wyciszenia przy zamkniętym panelu, a ukryty
+           panel ukryłby i jego ikony. Na urządzeniu przezroczystego pudełka nie da się dotknąć,
+           w przeglądarce robi to pointer-events */
         .vol-panel {
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease-in-out, visibility 0.2s;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
         }
         .vol-panel.open {
             opacity: 1;
-            visibility: visible;
+            pointer-events: auto;
         }
-        /* Ikona głośnika: wyciszony (.muted na całym ekranie) to przekreślony. Jedna klasa, bo konwerter
-           układa stronę raz dla każdej zmiany klas (do 96) */
+        /* Ikona głośnika: wyciszony (.muted na przycisku) to przekreślony. Klasa na przycisku, nie na
+           ekranie: konwerter maluje element, któremu zmienia się klasa, osobno w każdym wyglądzie - dla
+           całego ekranu byłby to nieruchomy obraz strony, bez dotyku i animacji */
         .vi-off { display: none; }
         .muted .vi-off { display: flex; }
         .muted .vi-on { display: none; }
@@ -885,11 +889,18 @@
         const volText = document.getElementById('vol-text');
         let panelIdle = 0;
 
-        const screen = document.getElementById('hmi-screen');
+        const volBtn = document.getElementById('vol-btn');
+        const volMute = document.getElementById('vol-mute');
 
         function showVolume() {
             volText.innerText = '' + dmod.get('volume');
-            if (dmod.get('muted') > 0) screen.classList.add('muted'); else screen.classList.remove('muted');
+            if (dmod.get('muted') > 0) {
+                volBtn.classList.add('muted');
+                volMute.classList.add('muted');
+            } else {
+                volBtn.classList.remove('muted');
+                volMute.classList.remove('muted');
+            }
         }
 
         function openPanel() {
