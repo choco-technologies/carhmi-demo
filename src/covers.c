@@ -678,6 +678,18 @@ void covers_want(covers_t c, uint32_t index, bool first)
         (void)dmosi_semaphore_post(c->wake, 1);
 }
 
+uint32_t covers_done(covers_t c)
+{
+    if (c == NULL)
+        return 0;
+    uint32_t done = 0;
+    dmosi_mutex_lock(c->lock);
+    for (uint32_t i = 0; i < c->count; i++)
+        done += (c->states[i] == COVER_MADE || c->states[i] == COVER_NONE) ? 1u : 0u;
+    dmosi_mutex_unlock(c->lock);
+    return done;
+}
+
 size_t covers_name_size(covers_t c)
 {
     return (c != NULL) ? strlen(c->dir) + 1U + KEY_DIGITS + 1U : 1u;

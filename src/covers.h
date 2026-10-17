@@ -43,6 +43,9 @@ void covers_want(covers_t c, uint32_t index, bool first);
 /** @brief The key of the cover of track `index`; 0: none - not made (yet), no picture, it cannot be made */
 uint32_t covers_key(covers_t c, uint32_t index);
 
+/** @brief How many of the tracks are done: their covers made, or found to be none */
+uint32_t covers_done(covers_t c);
+
 /** @brief Bytes covers_name() writes, with its zero */
 size_t covers_name_size(covers_t c);
 

@@ -350,6 +350,7 @@
                     <div class="flex-1 z-10 flex flex-col h-full bg-slate-900/60 rounded-xl border border-slate-700/50 backdrop-blur-md shadow-lg overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-700/50 bg-slate-800/40 flex justify-between items-center shadow-sm">
                             <span id="queue-label" class="text-[9px] font-bold text-slate-300 uppercase tracking-widest drop-shadow-md">Kolejka (5)</span>
+                            <span id="covers-label" class="block w-[72px] text-right text-[8px] text-slate-500 font-medium"></span>
                             <div class="flex gap-2">
                                 <button class="text-slate-400 hover:text-white transition"><i class="ph-bold ph-shuffle text-[10px]"></i></button>
                                 <button class="text-slate-400 hover:text-white transition"><i class="ph-bold ph-repeat text-[10px]"></i></button>
@@ -670,6 +671,12 @@
     </div>
 
     <script>
+        // Znaki, które aplikacja może pokazać w tekstach (tytuły, wykonawcy, ...) - czcionki
+        // widoku mają tylko znaki ze skryptów strony:
+        // ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789
+        // ĄĆĘŁŃÓŚŹŻ ąćęłńóśźż ÄÖÜäöüß ÉÈÊËéèêëÀÂàâÇçÎÏîïÔôÙÛùûÑñÁÍÚáíú
+        // !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+
         // --- 1. Zegar (Górny pasek) ---
         // Godzina od aplikacji (carhmi: z RTC przez dmutc), "--:--" gdy jej nie zna
         const uiClock = document.getElementById('clock');
@@ -786,6 +793,7 @@
         const uiTimeCurrent = document.getElementById('time-current');
         const uiTimeTotal = document.getElementById('time-total');
         const uiQueue = document.getElementById('queue-label');
+        const uiCovers = document.getElementById('covers-label');
         const homeTitle = document.getElementById('home-title');
         const homeArtist = document.getElementById('home-artist');
         const playIcon = document.getElementById('play-icon');
@@ -837,6 +845,19 @@
         dmod.onchange('playing', showPlaying);
         dmod.onchange('count', showRows);
         dmod.onchange('total', showRows);
+
+        // Okładki: ile utworów już przejrzano (carhmi robi je w tle) - widać, dopóki nie wszystkie
+        dmod.prop('covers.done', 0);
+        dmod.prop('covers.total', 0);
+        function showCovers() {
+            const done = dmod.get('covers.done'), total = dmod.get('covers.total');
+            if (total > 0 && done < total)
+                uiCovers.innerText = 'Okładki ' + done + '/' + total;
+            else
+                uiCovers.innerText = '';
+        }
+        dmod.onchange('covers.done', showCovers);
+        dmod.onchange('covers.total', showCovers);
         for (let i = 0; i < ROWS; i++) {
             dmod.onchange('row' + i + '.title', showRows);
             dmod.onchange('row' + i + '.time', showRows);

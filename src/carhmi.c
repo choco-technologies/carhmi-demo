@@ -29,7 +29,8 @@
  * new level) and mute. And the album covers (covers.c): the properties cover
  * (the playing track's) and rowN.cover name the images the view shows - a
  * cover once it is made, else the view's own; what to make the view says
- * (cover.sizes, row0.cover.sizes). Where it was in the music is kept next to
+ * (cover.sizes, row0.cover.sizes); covers.done of covers.total tracks are
+ * done. Where it was in the music is kept next to
  * it (playstate.c): after a reset the same track goes on from there, the
  * queue's window at it.
  *
@@ -278,6 +279,7 @@ typedef struct
     char*       name;                   /* A cover's name, for the view (covers_name_size()) */
     char*       own;                    /* The view's own image: what its property cover starts with */
     uint32_t    keys[COVER_PLACES];     /* NOT_SHOWN: nothing set yet */
+    int32_t     done;                   /* Tracks done (covers.done), -1: not shown yet */
 } covers_shown_t;
 
 /* A property's text, on the heap (Dmod_Free() it); NULL: the view has no such property */
@@ -298,6 +300,7 @@ static bool start_covers(uint32_t claim, player_t p, const char* music, covers_s
     memset(cs, 0, sizeof(*cs));
     for (uint32_t i = 0; i < COVER_PLACES; i++)
         cs->keys[i] = NOT_SHOWN;
+    cs->done = -1;
     char* sizes = prop_text(claim, "cover.sizes");
     char* rows = prop_text(claim, "row0.cover.sizes");          /* (the rows are alike) */
     cs->own = prop_text(claim, "cover");
@@ -360,11 +363,17 @@ static void show_cover(uint32_t claim, covers_shown_t* cs, uint32_t place, const
     cs->keys[place] = key;
 }
 
-/* The playing track's cover, the rows' */
+/* The playing track's cover, the rows', and how many of the tracks are done */
 static void show_covers(uint32_t claim, player_t p, const shown_t* v, covers_shown_t* cs)
 {
     if (cs->covers == NULL || !v->shown)
         return;
+    int32_t done = (int32_t)covers_done(cs->covers);
+    if (cs->done < 0)
+        (void)libdmview_prop_set_int(claim, "covers.total", (int32_t)player_count(p));
+    if (done != cs->done)
+        (void)libdmview_prop_set_int(claim, "covers.done", done);
+    cs->done = done;
     show_cover(claim, cs, 0, "cover", v->track, true);
     uint32_t total = player_count(p);
     for (uint32_t i = 0; i < ROWS; i++)
