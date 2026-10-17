@@ -85,6 +85,22 @@
         .row-active .row-artist { color: rgba(129, 140, 248, 0.8); }
         .row-active .row-eq { visibility: visible; }
 
+        /* Głośność: ikona w pasku górnym i panel pod nią (jak widoki: ukryty, dopóki nie ma .open) */
+        .vol-panel {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s;
+        }
+        .vol-panel.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Ikona głośnika: wyciszony (.muted na całym ekranie) to przekreślony. Jedna klasa, bo konwerter
+           układa stronę raz dla każdej zmiany klas (do 96) */
+        .vi-off { display: none; }
+        .muted .vi-off { display: flex; }
+        .muted .vi-on { display: none; }
+
                 /* Ukrycie paska przewijania (dla pewności) */
         ::-webkit-scrollbar {
             display: none;
@@ -112,11 +128,34 @@
                 <div id="clock" class="font-bold text-[11px] tracking-widest text-white drop-shadow-md">--:--</div>
                 <div class="flex items-center gap-2">
                     <span class="font-medium">18&deg;C</span>
+                    <!-- Głośność: dotknięcie otwiera panel. Przycisk jest wyższy i szerszy od ikony (pasek ma 24 px) -->
+                    <button id="vol-btn" class="h-[24px] w-[30px] flex items-center justify-center text-slate-200 active:scale-90 transition">
+                        <span class="vi-on flex"><i class="ph-fill ph-speaker-high text-sm"></i></span>
+                        <span class="vi-off"><i class="ph-fill ph-speaker-x text-sm text-red-400"></i></span>
+                    </button>
                     <div class="flex items-center gap-1 text-sky-400">
                         <span class="font-bold text-[8px] leading-none mt-0.5">LTE</span>
                         <i class="ph-fill ph-cell-signal-full text-xs"></i>
                     </div>
                 </div>
+            </div>
+
+            <!-- Panel głośności: pod ikoną, znika po 3 s bez dotyku -->
+            <div id="vol-panel" class="vol-panel absolute top-[28px] right-2 w-[300px] h-[56px] px-2 gap-1.5 flex items-center bg-slate-900/95 rounded-xl border border-slate-600/60 shadow-lg z-40 backdrop-blur-md">
+                <button id="vol-mute" class="w-11 h-11 rounded-lg bg-slate-800 flex items-center justify-center active:scale-90 transition">
+                    <span class="vi-on flex"><i class="ph-fill ph-speaker-high text-xl text-slate-200"></i></span>
+                    <span class="vi-off"><i class="ph-fill ph-speaker-x text-xl text-red-400"></i></span>
+                </button>
+                <button id="vol-down" class="w-11 h-11 rounded-lg bg-slate-800 flex items-center justify-center active:scale-90 transition">
+                    <i class="ph-bold ph-minus text-xl text-slate-200"></i>
+                </button>
+                <div class="flex-1 h-2.5 bg-slate-800 rounded-full overflow-hidden relative border border-slate-700/50 shadow-inner">
+                    <div id="vol-bar" data-dmod-width="volume" data-dmod-scale="100" data-dmod-value="60" class="absolute top-0 left-0 h-full w-full bg-sky-400 rounded-full"></div>
+                </div>
+                <span id="vol-text" class="w-[26px] text-right text-[11px] font-bold text-white">60</span>
+                <button id="vol-up" class="w-11 h-11 rounded-lg bg-slate-800 flex items-center justify-center active:scale-90 transition">
+                    <i class="ph-bold ph-plus text-xl text-slate-200"></i>
+                </button>
             </div>
 
             <!-- Menu boczne (Sidebar) -->
@@ -835,6 +874,54 @@
         document.getElementById('prev-btn').addEventListener('click', () => dmod.emit('prev'));
 
         showTime();
+
+        // --- Głośność ---
+        // carhmi ustawia `volume` (0-100) i `muted` (0/1); panel tylko mówi, co zrobiono: volume (nowa wartość), mute
+        const VOLUME_STEP = 10;
+        const PANEL_SECONDS = 3;
+        dmod.prop('volume', 60);
+        dmod.prop('muted', 0);
+        const volPanel = document.getElementById('vol-panel');
+        const volText = document.getElementById('vol-text');
+        let panelIdle = 0;
+
+        const screen = document.getElementById('hmi-screen');
+
+        function showVolume() {
+            volText.innerText = '' + dmod.get('volume');
+            if (dmod.get('muted') > 0) screen.classList.add('muted'); else screen.classList.remove('muted');
+        }
+
+        function openPanel() {
+            panelIdle = 0;
+            volPanel.classList.add('open');
+        }
+
+        function stepVolume(step) {
+            openPanel();
+            let v = dmod.get('volume') + step;
+            if (v < 0) v = 0;
+            if (v > 100) v = 100;
+            dmod.emit('volume', v);
+        }
+
+        dmod.onchange('volume', showVolume);
+        dmod.onchange('muted', showVolume);
+        document.getElementById('vol-btn').addEventListener('click', () => {
+            if (volPanel.classList.contains('open')) volPanel.classList.remove('open'); else openPanel();
+        });
+        document.getElementById('vol-down').addEventListener('click', () => stepVolume(-VOLUME_STEP));
+        document.getElementById('vol-up').addEventListener('click', () => stepVolume(VOLUME_STEP));
+        document.getElementById('vol-mute').addEventListener('click', () => {
+            openPanel();
+            dmod.emit('mute');
+        });
+        setInterval(() => {
+            if (!volPanel.classList.contains('open')) return;
+            panelIdle++;
+            if (panelIdle >= PANEL_SECONDS) volPanel.classList.remove('open');
+        }, 1000);
+        showVolume();
 
         // --- 5. Logika Klimatyzacji ---
         function changeTemp(side, change) {

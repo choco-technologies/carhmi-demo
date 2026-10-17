@@ -5,8 +5,8 @@
  * onchange / emit are the channel between them (dmview's properties and
  * events), compiled into the view. The conversion does not run this file:
  * here it plays the part of carhmi - a library of LIBRARY tracks, a window
- * of ROWS of them in the queue, a second at a time - so the page works in a
- * browser as it does on the device.
+ * of ROWS of them in the queue, a second at a time, a volume - so the page
+ * works in a browser as it does on the device.
  */
 (function () {
     const ROWS = 20;
@@ -117,6 +117,12 @@
                 play(first + value);
             else if (name === 'scroll')
                 window_at(first + value);       /* The list at an end: more of it */
+            else if (name === 'volume') {       /* A new volume turns the sound on, too */
+                app('volume', Math.max(0, Math.min(100, value)));
+                app('muted', 0);
+            }
+            else if (name === 'mute')
+                app('muted', props['muted'] ? 0 : 1);
         },
     };
 

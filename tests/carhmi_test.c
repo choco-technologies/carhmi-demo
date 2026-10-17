@@ -1,6 +1,7 @@
 #define DMOD_ENABLE_REGISTRATION ON
 #include "dmod_test.h"
 #include "local_time.h"
+#include "volume.h"
 #include <string.h>
 
 /* "YYYY-MM-DD HH:MM:SS" of the local time of a UTC calendar */
@@ -46,4 +47,73 @@ DMOD_TEST_STEP(local_time_changes_on_the_last_sundays_at_one_utc)
 DMOD_TEST_STEP(local_time_goes_into_the_next_year)
 {
     DMOD_TEST_EXPECT(strcmp(local_of(2026, 12, 31, 23, 30, 0), "2027-01-01 00:30:00") == 0);
+}
+
+/* A directory the test may write to */
+#define VOLUME_DIR "/tmp"
+
+DMOD_TEST_STEP(volume_starts_at_the_default_and_stays_in_range)
+{
+    (void)Dmod_FileRemove(VOLUME_DIR "/.volume");
+    volume_t v = volume_new(VOLUME_DIR);
+    DMOD_TEST_EXPECT(v != NULL);
+    if (v == NULL)
+        return;
+    DMOD_TEST_EXPECT(volume_level(v) == VOLUME_DEFAULT);
+    DMOD_TEST_EXPECT(!volume_muted(v));
+
+    volume_set(v, 30);
+    DMOD_TEST_EXPECT(volume_level(v) == 30);
+    volume_set(v, 250);
+    DMOD_TEST_EXPECT(volume_level(v) == 100);
+    volume_set(v, -5);
+    DMOD_TEST_EXPECT(volume_level(v) == 0);
+    volume_free(v);
+}
+
+DMOD_TEST_STEP(volume_mute_is_turned_off_by_a_new_level)
+{
+    volume_t v = volume_new(NULL);
+    DMOD_TEST_EXPECT(v != NULL);
+    if (v == NULL)
+        return;
+    volume_toggle_mute(v);
+    DMOD_TEST_EXPECT(volume_muted(v));
+    DMOD_TEST_EXPECT(volume_level(v) == VOLUME_DEFAULT);        /* (the level is kept) */
+    volume_toggle_mute(v);
+    DMOD_TEST_EXPECT(!volume_muted(v));
+    volume_toggle_mute(v);
+    volume_set(v, 40);
+    DMOD_TEST_EXPECT(!volume_muted(v));
+    volume_free(v);
+}
+
+DMOD_TEST_STEP(volume_is_kept_between_starts)
+{
+    (void)Dmod_FileRemove(VOLUME_DIR "/.volume");
+    volume_t v = volume_new(VOLUME_DIR);
+    DMOD_TEST_EXPECT(v != NULL);
+    if (v == NULL)
+        return;
+    volume_set(v, 35);
+    volume_free(v);                                             /* (writes what was not written) */
+
+    v = volume_new(VOLUME_DIR);
+    DMOD_TEST_EXPECT(v != NULL);
+    if (v == NULL)
+        return;
+    DMOD_TEST_EXPECT(volume_level(v) == 35);
+    DMOD_TEST_EXPECT(!volume_muted(v));
+    volume_free(v);
+    (void)Dmod_FileRemove(VOLUME_DIR "/.volume");
+}
+
+DMOD_TEST_STEP(volume_without_a_device_is_not_applied)
+{
+    volume_t v = volume_new(NULL);
+    DMOD_TEST_EXPECT(v != NULL);
+    if (v == NULL)
+        return;
+    DMOD_TEST_EXPECT(!volume_poll(v, 1000));                    /* (no audio device is served here) */
+    volume_free(v);
 }

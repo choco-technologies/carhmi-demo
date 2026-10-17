@@ -4,6 +4,7 @@
 #include "libsystemd.h"
 #include "player.h"
 #include "local_time.h"
+#include "volume.h"
 #include <errno.h>
 #include <string.h>
 
@@ -21,7 +22,9 @@
  * total, and the queue's rows: first, count, rowN.title / .artist / .time -,
  * and takes what was done - the events toggle, next, prev, select (a row)
  * and scroll. And the time: clock, "HH:MM" of dmutc's UTC in Polish time
- * (local_time.c), "--:--" while there is no RTC.
+ * (local_time.c), "--:--" while there is no RTC. And the volume (volume.c):
+ * the properties volume (0 - 100) and muted (0 / 1), the events volume (the
+ * new level) and mute.
  *
  * The queue is a window of ROWS tracks over all of them, at `first`: when
  * the list is scrolled to an end the view asks for more (scroll, +n / -n
@@ -132,6 +135,36 @@ static void show_clock(uint32_t claim, wall_t* c)
     }
     c->read_at = now;
     c->shown = true;
+}
+
+/* The volume, into the view: when it changed */
+typedef struct
+{
+    int32_t     level;          /* -1: not shown yet */
+    int32_t     muted;
+} volume_shown_t;
+
+static void show_volume(uint32_t claim, volume_t v, volume_shown_t* shown)
+{
+    int32_t level = volume_level(v), muted = volume_muted(v) ? 1 : 0;
+    if (level != shown->level)
+        (void)libdmview_prop_set_int(claim, "volume", level);
+    if (muted != shown->muted)
+        (void)libdmview_prop_set_int(claim, "muted", muted);
+    shown->level = level;
+    shown->muted = muted;
+}
+
+/* What the view says about the volume: true when the event was one of them */
+static bool handle_volume(volume_t v, const libdmview_event_t* ev)
+{
+    if (strcmp(ev->name, "volume") == 0)
+        volume_set(v, ev->value);
+    else if (strcmp(ev->name, "mute") == 0)
+        volume_toggle_mute(v);
+    else
+        return false;
+    return true;
 }
 
 /* What the player is at, into the view: the track when it changed, the time every second */
@@ -303,6 +336,9 @@ int main(int argc, char* argv[])
             memset(&shown, 0, sizeof(shown));
             wall_t wall;
             memset(&wall, 0, sizeof(wall));
+            volume_t volume = volume_new(dir);
+            volume_shown_t volume_shown = { -1, -1 };
+            bool volume_logged = false;
             if (p != NULL && player_count(p) > 0)
                 player_play(p, 0);
             while (!libsystemd_stop_requested())
@@ -312,12 +348,24 @@ int main(int argc, char* argv[])
                 if (got == -ENOENT)
                     break;                      /* (the claim is gone - the display with it) */
                 show_clock(claim, &wall);
+                bool taken = false;
+                if (volume != NULL)
+                {
+                    taken = got == 0 && handle_volume(volume, &ev);
+                    if (volume_poll(volume, Dmod_GetUptime()) && !volume_logged)
+                    {
+                        DMOD_LOG_INFO("carhmi: volume %u%% set\n", (unsigned)volume_level(volume));
+                        volume_logged = true;
+                    }
+                    show_volume(claim, volume, &volume_shown);
+                }
                 if (p == NULL)
                     continue;
-                if (got == 0)
+                if (got == 0 && !taken)
                     handle(claim, p, &ev, &shown);
                 show(claim, p, &shown);
             }
+            volume_free(volume);
             player_free(p);
             (void)libdmview_release(claim);
         }
