@@ -24,7 +24,7 @@ DMOD_MODULE_VERSION=0.1
 DMOD_AUTHOR_NAME=Patryk Kubiak
 
 # The list of C sources
-DMOD_CSOURCES=src/carhmi.c src/player.c src/local_time.c src/volume.c
+DMOD_CSOURCES=src/carhmi.c src/player.c src/local_time.c src/volume.c src/covers.c src/playstate.c
 
 # The list of C++ sources
 DMOD_CXXSOURCES=

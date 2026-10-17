@@ -5,6 +5,8 @@
 #include "player.h"
 #include "local_time.h"
 #include "volume.h"
+#include "covers.h"
+#include "playstate.h"
 #include <errno.h>
 #include <string.h>
 
@@ -24,7 +26,12 @@
  * and scroll. And the time: clock, "HH:MM" of dmutc's UTC in Polish time
  * (local_time.c), "--:--" while there is no RTC. And the volume (volume.c):
  * the properties volume (0 - 100) and muted (0 / 1), the events volume (the
- * new level) and mute.
+ * new level) and mute. And the album covers (covers.c): the properties cover
+ * (the playing track's) and rowN.cover name the images the view shows - a
+ * cover once it is made, else the view's own; what to make the view says
+ * (cover.sizes, row0.cover.sizes). Where it was in the music is kept next to
+ * it (playstate.c): after a reset the same track goes on from there, the
+ * queue's window at it.
  *
  * The queue is a window of ROWS tracks over all of them, at `first`: when
  * the list is scrolled to an end the view asks for more (scroll, +n / -n
@@ -46,6 +53,10 @@
 #define EVENT_WAIT_MS   250u
 #define ROWS            20u             /* Of the view's queue: a window over the tracks */
 #define CLOCK_MS        1000u           /* How often the RTC is read */
+#define COVERS_DIR      ".covers"       /* Of the music directory: the covers made */
+#define PROP_TEXT       256u            /* Bytes of a property's text read from the view, at most */
+#define COVER_PLACES    (ROWS + 1u)     /* The playing track's cover, the rows' */
+#define NOT_SHOWN       0xFFFFFFFFu
 
 /*
  * The view, when none is given: the firmware's (DEFAULT_VIEW), else the one on a
@@ -221,7 +232,7 @@ static void show(uint32_t claim, player_t p, shown_t* v)
     if (!v->shown)
     {
         (void)libdmview_prop_set_int(claim, "total", (int32_t)player_count(p));
-        show_window(claim, p, v, 0);
+        show_window(claim, p, v, v->first);         /* (where the track kept is, else 0) */
     }
     if (!v->shown || st.changes != v->changes)
     {
@@ -258,6 +269,111 @@ static void show(uint32_t claim, player_t p, shown_t* v)
         v->duration = duration;
     }
     v->shown = true;
+}
+
+/* The covers, into the view: at each place the key shown (0: the view's own image) */
+typedef struct
+{
+    covers_t    covers;
+    char*       name;                   /* A cover's name, for the view (covers_name_size()) */
+    char*       own;                    /* The view's own image: what its property cover starts with */
+    uint32_t    keys[COVER_PLACES];     /* NOT_SHOWN: nothing set yet */
+} covers_shown_t;
+
+/* A property's text, on the heap (Dmod_Free() it); NULL: the view has no such property */
+static char* prop_text(uint32_t claim, const char* name)
+{
+    char* text = Dmod_Malloc(PROP_TEXT);
+    if (text != NULL && libdmview_prop_get_string(claim, name, text, PROP_TEXT) != 0)
+    {
+        Dmod_Free(text);
+        text = NULL;
+    }
+    return text;
+}
+
+/* The covers of the tracks, in `music`/COVERS_DIR at the sizes the view shows them at; false: none (an older view) */
+static bool start_covers(uint32_t claim, player_t p, const char* music, covers_shown_t* cs)
+{
+    memset(cs, 0, sizeof(*cs));
+    for (uint32_t i = 0; i < COVER_PLACES; i++)
+        cs->keys[i] = NOT_SHOWN;
+    char* sizes = prop_text(claim, "cover.sizes");
+    char* rows = prop_text(claim, "row0.cover.sizes");          /* (the rows are alike) */
+    cs->own = prop_text(claim, "cover");
+    size_t dir_size = strlen(music) + sizeof("/" COVERS_DIR);
+    char* dir = Dmod_Malloc(dir_size);
+    char* all = (sizes != NULL) ? Dmod_Malloc(strlen(sizes) + 1U + ((rows != NULL) ? strlen(rows) : 0u) + 1U) : NULL;
+    if (dir != NULL && all != NULL && cs->own != NULL && p != NULL)
+    {
+        Dmod_SnPrintf(dir, dir_size, "%s/%s", music, COVERS_DIR);
+        strcpy(all, sizes);
+        if (rows != NULL)
+        {
+            strcat(all, " ");
+            strcat(all, rows);
+        }
+        cs->covers = covers_new(p, dir, all);
+        cs->name = (cs->covers != NULL) ? Dmod_Malloc(covers_name_size(cs->covers)) : NULL;
+        if (cs->covers != NULL)
+            DMOD_LOG_INFO("carhmi: covers in %s (%s)\n", dir, all);
+    }
+    if (sizes != NULL)
+        Dmod_Free(sizes);
+    if (rows != NULL)
+        Dmod_Free(rows);
+    if (dir != NULL)
+        Dmod_Free(dir);
+    if (all != NULL)
+        Dmod_Free(all);
+    if (cs->name == NULL)
+    {
+        covers_free(cs->covers);
+        cs->covers = NULL;
+    }
+    return cs->covers != NULL;
+}
+
+static void stop_covers(covers_shown_t* cs)
+{
+    covers_free(cs->covers);
+    if (cs->name != NULL)
+        Dmod_Free(cs->name);
+    if (cs->own != NULL)
+        Dmod_Free(cs->own);
+}
+
+/* The cover of `track` (-1: none) at a place, asked for (`first`: before the others) */
+static void show_cover(uint32_t claim, covers_shown_t* cs, uint32_t place, const char* prop, int64_t track, bool first)
+{
+    uint32_t key = 0;
+    if (track >= 0)
+    {
+        covers_want(cs->covers, (uint32_t)track, first);
+        key = covers_key(cs->covers, (uint32_t)track);
+    }
+    if (key == cs->keys[place])
+        return;
+    if (key != 0)
+        covers_name(cs->covers, key, cs->name, covers_name_size(cs->covers));
+    (void)libdmview_prop_set_string(claim, prop, (key != 0) ? cs->name : cs->own);
+    cs->keys[place] = key;
+}
+
+/* The playing track's cover, the rows' */
+static void show_covers(uint32_t claim, player_t p, const shown_t* v, covers_shown_t* cs)
+{
+    if (cs->covers == NULL || !v->shown)
+        return;
+    show_cover(claim, cs, 0, "cover", v->track, true);
+    uint32_t total = player_count(p);
+    for (uint32_t i = 0; i < ROWS; i++)
+    {
+        char name[24];
+        uint32_t track = v->first + i;
+        Dmod_SnPrintf(name, sizeof(name), "row%u.cover", (unsigned)i);
+        show_cover(claim, cs, 1u + i, name, (track < total) ? (int64_t)track : -1, false);
+    }
 }
 
 /* What was done in the view */
@@ -336,10 +452,23 @@ int main(int argc, char* argv[])
             memset(&shown, 0, sizeof(shown));
             wall_t wall;
             memset(&wall, 0, sizeof(wall));
+            covers_shown_t covers;
+            (void)start_covers(claim, p, dir, &covers);
             volume_t volume = volume_new(dir);
             volume_shown_t volume_shown = { -1, -1 };
             bool volume_logged = false;
-            if (p != NULL && player_count(p) > 0)
+            playstate_t resume = playstate_new(dir);
+            const char* file = NULL;
+            uint32_t position_ms = 0;
+            bool playing = true;
+            int32_t start = -1;
+            if (p != NULL && playstate_saved(resume, &file, &position_ms, &playing) && (start = player_find(p, file)) >= 0)
+            {
+                DMOD_LOG_INFO("carhmi: on with %s at %u s\n", file, (unsigned)(position_ms / 1000u));
+                player_play_at(p, (uint32_t)start, position_ms, playing);
+                shown.first = (uint32_t)start;
+            }
+            else if (p != NULL && player_count(p) > 0)
                 player_play(p, 0);
             while (!libsystemd_stop_requested())
             {
@@ -364,7 +493,14 @@ int main(int argc, char* argv[])
                 if (got == 0 && !taken)
                     handle(claim, p, &ev, &shown);
                 show(claim, p, &shown);
+                show_covers(claim, p, &shown, &covers);
+                player_state_t st;
+                player_state(p, &st);
+                playstate_update(resume, (st.track >= 0) ? player_file(p, (uint32_t)st.track) : NULL, st.position_ms,
+                                 st.playing, Dmod_GetUptime());
             }
+            stop_covers(&covers);
+            playstate_free(resume);
             volume_free(volume);
             player_free(p);
             (void)libdmview_release(claim);

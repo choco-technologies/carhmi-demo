@@ -45,6 +45,21 @@ uint32_t player_count(player_t p);
 /** @brief What track `index` shows - its tags read the first time it is asked. false: no such track */
 bool player_info(player_t p, uint32_t index, player_info_t* info);
 
+/** @brief The file of track `index` (Dmod_Free() it); NULL: no such track, out of memory */
+char* player_path(player_t p, uint32_t index);
+
+/** @brief The name of track `index`'s file (as long as the player is); NULL: no such track */
+const char* player_file(player_t p, uint32_t index);
+
+/** @brief The track of the file named `file`, -1: none */
+int32_t player_find(player_t p, const char* file);
+
+/**
+ * @brief Start track `index` at `ms` (where its seek puts it) - playing, or
+ *        paused there (`playing` false)
+ */
+void player_play_at(player_t p, uint32_t index, uint32_t ms, bool playing);
+
 void player_play(player_t p, uint32_t index);      /* From its start */
 void player_toggle(player_t p);
 void player_next(player_t p, int32_t step);         /* +1 / -1, around */
