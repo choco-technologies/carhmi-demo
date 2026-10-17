@@ -82,6 +82,7 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/carhmi.c
     src/player.c
     src/local_time.c
+    src/volume.c
 )
 
 # libdmview: the display claimed, the channel of the claim (0.10).
