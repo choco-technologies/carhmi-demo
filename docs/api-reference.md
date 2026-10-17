@@ -30,9 +30,9 @@ carhmi decodes the current one (dmmp3) and plays it through the audio
 service (libdmaudio, on the first audio device); at its end the next one
 starts.
 
-The view shows ten rows of the queue: a window over all the tracks, from
+The view shows twenty rows of the queue: a window over all the tracks, from
 `first`. When the list is scrolled to its end (its start), the view asks for
-more - the event `scroll`, +5 (-5) -, carhmi moves the window, and the view
+more - the event `scroll`, +10 (-10) -, carhmi moves the window, and the view
 scrolls its rows back by as many: what is seen stays where it is, and the
 next tracks are below it.
 
@@ -48,7 +48,7 @@ the scrolling needs dmview's SCROLLED, 0.13):
 | `title`, `artist` | carhmi | Of the current track |
 | `position`, `duration` | carhmi | Seconds |
 | `progress` | carhmi | 0..1000, the width of the progress bar (`data-dmod-width`) |
-| `rowN.title`, `.artist`, `.time` | carhmi | The ten rows of the window |
+| `rowN.title`, `.artist`, `.time` | carhmi | The twenty rows of the window |
 
 | Event | Value | What carhmi does |
 |-------|-------|------------------|

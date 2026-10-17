@@ -39,7 +39,7 @@
 #define DISPLAY_WAIT_MS 10000u
 #define VIEW_WAIT_MS    30000u
 #define EVENT_WAIT_MS   250u
-#define ROWS            10u             /* Of the view's queue: a window over the tracks */
+#define ROWS            20u             /* Of the view's queue: a window over the tracks */
 
 /*
  * The view, when none is given: the firmware's (DEFAULT_VIEW), else the one on a

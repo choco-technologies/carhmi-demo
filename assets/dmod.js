@@ -9,7 +9,7 @@
  * browser as it does on the device.
  */
 (function () {
-    const ROWS = 10;
+    const ROWS = 20;
     const LIBRARY = 40;
     const props = {};
     const listeners = {};
