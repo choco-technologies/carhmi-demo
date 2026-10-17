@@ -83,11 +83,14 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/player.c
     src/local_time.c
     src/volume.c
+    src/covers.c
+    src/playstate.c
 )
 
 # libdmview: the display claimed, the channel of the claim (0.10).
 # dmmp3: the MP3 files. libdmaudio: playing them. dmlist: the list of the files.
-# dmutc: the time of the clock.
+# dmutc: the time of the clock. dmimg, libtodmvi: the covers - read by the
+# decoders dmimg_jpeg, dmimg_png (loaded by name), made into images.
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.7
     dmosi
@@ -97,6 +100,10 @@ dmod_link_modules(${DMOD_MODULE_NAME}
     libdmaudio@>=0.1
     dmlist
     dmutc
+    dmimg
+    libtodmvi
+    dmimg_jpeg
+    dmimg_png
 )
 
 enable_testing()

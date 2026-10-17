@@ -48,6 +48,7 @@ struct player
     /* Asked of the thread (under lock) */
     int32_t             current;        /* -1: none */
     int32_t             request;        /* A track to start, -1: none */
+    uint32_t            request_ms;     /* ... where in it */
     bool                playing;
     uint32_t            changes;
 
@@ -200,8 +201,10 @@ static void player_thread(void* arg)
         dmosi_mutex_lock(p->lock);
         bool quit = p->quit;
         int32_t request = p->request;
+        uint32_t request_ms = p->request_ms;
         bool playing = p->playing;
         p->request = -1;
+        p->request_ms = 0;
         dmosi_mutex_unlock(p->lock);
         if (quit)
             break;
@@ -216,7 +219,11 @@ static void player_thread(void* arg)
             dmmp3_info_t info;
             memset(&info, 0, sizeof(info));
             if (mp3 != NULL)
+            {
                 (void)dmmp3_get_info(mp3, &info);
+                if (request_ms > 0 && dmmp3_seek(mp3, request_ms) != 0)
+                    request_ms = 0;
+            }
             else
                 DMOD_LOG_ERROR("carhmi: cannot play %s (%d)\n", (path != NULL) ? path : "?", status);
             if (path != NULL)
@@ -234,7 +241,7 @@ static void player_thread(void* arg)
                 paused = false;
             }
             dmosi_mutex_lock(p->lock);
-            p->position_ms = 0;
+            p->position_ms = (mp3 != NULL) ? request_ms : 0;
             p->duration_ms = info.duration_ms;
             dmosi_mutex_unlock(p->lock);
         }
@@ -396,17 +403,44 @@ static void wake(player_t p)
     (void)dmosi_semaphore_post(p->wake, 1);
 }
 
-void player_play(player_t p, uint32_t index)
+char* player_path(player_t p, uint32_t index)
+{
+    return (p != NULL && index < p->count) ? track_path(p, track_at(p, index)) : NULL;
+}
+
+const char* player_file(player_t p, uint32_t index)
+{
+    track_t* t = (p != NULL) ? track_at(p, index) : NULL;
+    return (t != NULL) ? t->file : NULL;
+}
+
+int32_t player_find(player_t p, const char* file)
+{
+    for (uint32_t i = 0; p != NULL && file != NULL && i < p->count; i++)
+    {
+        if (strcmp(track_at(p, i)->file, file) == 0)
+            return (int32_t)i;
+    }
+    return -1;
+}
+
+void player_play_at(player_t p, uint32_t index, uint32_t ms, bool playing)
 {
     if (index >= p->count)
         return;
     dmosi_mutex_lock(p->lock);
     p->current = (int32_t)index;
     p->request = (int32_t)index;
-    p->playing = true;
+    p->request_ms = ms;
+    p->playing = playing;
     p->changes++;
     dmosi_mutex_unlock(p->lock);
     wake(p);
+}
+
+void player_play(player_t p, uint32_t index)
+{
+    player_play_at(p, index, 0, true);
 }
 
 void player_toggle(player_t p)
