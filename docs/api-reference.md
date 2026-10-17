@@ -22,25 +22,37 @@ error of `libdmview_claim()`.
 
 ## The player
 
-The MP3 files of the music directory (sorted by name, up to 200) are the
-player's queue: their ID3 tags give the title and the artist (the file's name
-when there is none). A thread of carhmi decodes the current one (dmmp3) and
-plays it through the audio service (libdmaudio, on the first audio device);
-at its end the next one starts.
+The MP3 files of the music directory (sorted by name, as many as there are)
+are the player's queue: a list (dmlist) with a block of each file's name;
+their ID3 tags - the title and the artist (the file's name when there is
+none), the length - are read when a track is shown or played. A thread of
+carhmi decodes the current one (dmmp3) and plays it through the audio
+service (libdmaudio, on the first audio device); at its end the next one
+starts.
 
-carhmi and the view talk through the claim's channel (libdmview 0.10):
+The view shows ten rows of the queue: a window over all the tracks, from
+`first`. When the list is scrolled to its end (its start), the view asks for
+more - the event `scroll`, +5 (-5) -, carhmi moves the window, and the view
+scrolls its rows back by as many: what is seen stays where it is, and the
+next tracks are below it.
+
+carhmi and the view talk through the claim's channel (libdmview 0.10;
+the scrolling needs dmview's SCROLLED, 0.13):
 
 | Property | Set by | What it is |
 |----------|--------|------------|
-| `track`, `count` | carhmi | The current track (-1: none) and how many there are |
+| `total` | carhmi | The tracks of the queue |
+| `first`, `count` | carhmi | The window's first track, its rows that have one |
+| `track` | carhmi | The current track's row in the window (-1: not in it) |
 | `playing` | carhmi | 1 while it plays |
 | `title`, `artist` | carhmi | Of the current track |
 | `position`, `duration` | carhmi | Seconds |
 | `progress` | carhmi | 0..1000, the width of the progress bar (`data-dmod-width`) |
-| `rowN.title`, `.artist`, `.time` | carhmi | The ten rows of the queue the view shows |
+| `rowN.title`, `.artist`, `.time` | carhmi | The ten rows of the window |
 
 | Event | Value | What carhmi does |
 |-------|-------|------------------|
 | `toggle` | - | Play / pause (the first track when none was played) |
-| `next`, `prev` | - | The next / previous track, around |
-| `select` | row | Plays the track of that row |
+| `next`, `prev` | - | The next / previous track, around (the window follows it) |
+| `select` | row | Plays the track of that row of the window |
+| `scroll` | +n / -n | Moves the window by n tracks (as far as there are) |

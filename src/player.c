@@ -2,6 +2,7 @@
 #include "dmosi.h"
 #include "dmmp3.h"
 #include "libdmaudio.h"
+#include "dmlist.h"
 #include <errno.h>
 #include <string.h>
 
@@ -12,7 +13,6 @@
  * pause, go on (under `lock`) and reads where it is.
  */
 
-#define MAX_TRACKS      200u
 #define CHUNK_FRAMES    1152u           /* An MP3 frame */
 #define BUFFER_MS       500u            /* Of the stream: the card's and the drawing's delays */
 #define THREAD_STACK    4096u           /* (the decoder's memory is on the heap) */
@@ -20,9 +20,24 @@
 #define IDLE_MS         100u
 #define WRITE_MS        200u
 
+/*
+ * A file: one block with its name (in the player's `dir`) - its path is made
+ * when it is opened -, its tags once they are read (they are when it is
+ * shown or played), each as long as it is
+ */
+typedef struct
+{
+    char*       title;          /* The tag's, else the file's name without .mp3 (NULL: not read yet) */
+    char*       artist;         /* NULL: none */
+    uint32_t    duration_ms;
+    bool        read;           /* Its tags were read (under lock) */
+    char        file[];         /* Its name */
+} track_t;
+
 struct player
 {
-    player_track_t*     tracks;
+    char*               dir;
+    dmlist_context_t*   tracks;         /* track_t*, by name - made before the thread, not changed after */
     uint32_t            count;
     dmosi_mutex_t       lock;
     dmosi_semaphore_t   wake;
@@ -52,24 +67,46 @@ static bool is_mp3(const char* name)
     return e[0] == '.' && (e[1] | 0x20) == 'm' && (e[2] | 0x20) == 'p' && e[3] == '3';
 }
 
-static void copy_text(char* to, const char* from, size_t n)
+static void track_free(track_t* t)
 {
-    size_t k = strlen(from);
-    if (k >= PLAYER_TEXT)
-    {
-        k = PLAYER_TEXT - 1U;
-        while (k > 0 && ((uint8_t)from[k] & 0xC0u) == 0x80u)
-            k--;                                    /* Not in a character */
-    }
-    if (k > n)
-        k = n;
-    memcpy(to, from, k);
-    to[k] = '\0';
+    if (t == NULL)
+        return;
+    if (t->title != NULL)
+        Dmod_Free(t->title);
+    if (t->artist != NULL)
+        Dmod_Free(t->artist);
+    Dmod_Free(t);
 }
 
-static int by_name(const player_track_t* a, const player_track_t* b)
+static track_t* track_new(const char* name)
 {
-    return strcmp(a->path, b->path);
+    size_t n = strlen(name);
+    track_t* t = Dmod_Malloc(sizeof(*t) + n + 1U);
+    if (t == NULL)
+        return NULL;
+    memset(t, 0, sizeof(*t));
+    memcpy(t->file, name, n + 1U);
+    return t;
+}
+
+/* Its path, for as long as it is opened (Dmod_Free() it); NULL: out of memory */
+static char* track_path(player_t p, const track_t* t)
+{
+    size_t size = strlen(p->dir) + 1U + strlen(t->file) + 1U;
+    char* path = Dmod_Malloc(size);
+    if (path != NULL)
+        Dmod_SnPrintf(path, size, "%s/%s", p->dir, t->file);
+    return path;
+}
+
+static int by_name(const void* a, const void* b)
+{
+    return strcmp(((const track_t*)a)->file, ((const track_t*)b)->file);
+}
+
+static track_t* track_at(player_t p, uint32_t index)
+{
+    return (index < p->count) ? dmlist_get(p->tracks, index) : NULL;
 }
 
 static uint32_t scan(player_t p, const char* dir)
@@ -78,36 +115,71 @@ static uint32_t scan(player_t p, const char* dir)
     if (d == NULL)
         return 0;
     const char* name;
-    while ((name = Dmod_ReadDir(d)) != NULL && p->count < MAX_TRACKS)
+    while ((name = Dmod_ReadDir(d)) != NULL)
     {
         if (!is_mp3(name))
             continue;
-        player_track_t* t = &p->tracks[p->count];
-        memset(t, 0, sizeof(*t));
-        Dmod_SnPrintf(t->path, sizeof(t->path), "%s/%s", dir, name);
-        dmmp3_info_t info;
-        if (dmmp3_read_info(t->path, &info) != 0)
-            continue;                               /* Not an MP3 file after all */
-        if (info.title[0] != '\0')
-            copy_text(t->title, info.title, sizeof(t->title) - 1U);
-        else
-            copy_text(t->title, name, strlen(name) - 4U);   /* Its name, without .mp3 */
-        copy_text(t->artist, info.artist, sizeof(t->artist) - 1U);
-        t->duration_ms = info.duration_ms;
-        p->count++;
+        track_t* t = track_new(name);
+        if (t == NULL || !dmlist_push_back(p->tracks, t))
+        {
+            track_free(t);
+            DMOD_LOG_ERROR("carhmi: no memory for the files of %s\n", dir);
+            break;
+        }
     }
     Dmod_CloseDir(d);
-
-    /* By name (insertion: a card's directory, not a million files) */
-    for (uint32_t i = 1; i < p->count; i++)
-    {
-        player_track_t t = p->tracks[i];
-        uint32_t k = i;
-        for (; k > 0 && by_name(&p->tracks[k - 1U], &t) > 0; k--)
-            p->tracks[k] = p->tracks[k - 1U];
-        p->tracks[k] = t;
-    }
+    (void)dmlist_sort(p->tracks, by_name);
+    p->count = (uint32_t)dmlist_size(p->tracks);
     return p->count;
+}
+
+/* A text of a tag on the heap, as long as it is; NULL for none */
+static char* tag_text(const char* text)
+{
+    return (text[0] != '\0') ? Dmod_StrDup(text) : NULL;
+}
+
+/* A track's tags, read once: outside the lock (the card), kept under it */
+static void read_tags(player_t p, track_t* t)
+{
+    dmosi_mutex_lock(p->lock);
+    bool read = t->read;
+    dmosi_mutex_unlock(p->lock);
+    if (read)
+        return;
+    dmmp3_info_t* info = Dmod_Malloc(sizeof(*info));     /* (its texts: 3 x 64 bytes - not on the stack) */
+    char* path = track_path(p, t);
+    bool ok = info != NULL && path != NULL && dmmp3_read_info(path, info) == 0;
+    char* title = ok ? tag_text(info->title) : NULL;
+    char* artist = ok ? tag_text(info->artist) : NULL;
+    if (title == NULL)
+    {
+        /* Its file's name, without .mp3 */
+        size_t n = strlen(t->file) - 4U;
+        if ((title = Dmod_Malloc(n + 1U)) != NULL)
+        {
+            memcpy(title, t->file, n);
+            title[n] = '\0';
+        }
+    }
+    dmosi_mutex_lock(p->lock);
+    if (!t->read)
+    {
+        t->read = true;
+        t->title = title;
+        t->artist = artist;
+        t->duration_ms = ok ? info->duration_ms : 0;
+        title = artist = NULL;
+    }
+    dmosi_mutex_unlock(p->lock);
+    if (title != NULL)
+        Dmod_Free(title);                           /* (read meanwhile by the other thread) */
+    if (artist != NULL)
+        Dmod_Free(artist);
+    if (path != NULL)
+        Dmod_Free(path);
+    if (info != NULL)
+        Dmod_Free(info);
 }
 
 /* ---- The thread ---- */
@@ -139,13 +211,16 @@ static void player_thread(void* arg)
             /* Another track: what the stream holds of the previous one is dropped */
             dmmp3_close(mp3);
             int status = 0;
-            mp3 = dmmp3_open(p->tracks[request].path, &status);
+            char* path = track_path(p, track_at(p, (uint32_t)request));
+            mp3 = (path != NULL) ? dmmp3_open(path, &status) : NULL;
             dmmp3_info_t info;
             memset(&info, 0, sizeof(info));
             if (mp3 != NULL)
                 (void)dmmp3_get_info(mp3, &info);
             else
-                DMOD_LOG_ERROR("carhmi: cannot play %s (%d)\n", p->tracks[request].path, status);
+                DMOD_LOG_ERROR("carhmi: cannot play %s (%d)\n", (path != NULL) ? path : "?", status);
+            if (path != NULL)
+                Dmod_Free(path);
             libdmaudio_close(stream);
             stream = NULL;
             if (mp3 != NULL)
@@ -245,12 +320,13 @@ player_t player_new(const char* dir)
     if (p == NULL)
         return NULL;
     memset(p, 0, sizeof(*p));
-    p->tracks = Dmod_Malloc(MAX_TRACKS * sizeof(player_track_t));
+    p->tracks = dmlist_create();
+    p->dir = Dmod_StrDup(dir);
     p->lock = dmosi_mutex_create(false);
     p->wake = dmosi_semaphore_create(0, 8);
     p->current = -1;
     p->request = -1;
-    if (p->tracks == NULL || p->lock == NULL || p->wake == NULL)
+    if (p->tracks == NULL || p->dir == NULL || p->lock == NULL || p->wake == NULL)
     {
         player_free(p);
         return NULL;
@@ -284,7 +360,14 @@ void player_free(player_t p)
     if (p->lock != NULL)
         dmosi_mutex_destroy(p->lock);
     if (p->tracks != NULL)
-        Dmod_Free(p->tracks);
+    {
+        track_t* t;
+        while ((t = dmlist_pop_front(p->tracks)) != NULL)
+            track_free(t);
+        dmlist_destroy(p->tracks);
+    }
+    if (p->dir != NULL)
+        Dmod_Free(p->dir);
     Dmod_Free(p);
 }
 
@@ -293,9 +376,18 @@ uint32_t player_count(player_t p)
     return p->count;
 }
 
-const player_track_t* player_track(player_t p, uint32_t index)
+bool player_info(player_t p, uint32_t index, player_info_t* info)
 {
-    return (index < p->count) ? &p->tracks[index] : NULL;
+    track_t* t = track_at(p, index);
+    if (t == NULL)
+        return false;
+    read_tags(p, t);
+    dmosi_mutex_lock(p->lock);
+    info->title = (t->title != NULL) ? t->title : t->file;
+    info->artist = (t->artist != NULL) ? t->artist : "";
+    info->duration_ms = t->duration_ms;
+    dmosi_mutex_unlock(p->lock);
+    return true;
 }
 
 /* The thread takes what it was asked at once (it takes the posts at the top of its loop) */

@@ -17,8 +17,14 @@
  * run in libdmview. carhmi claims the display for it (libdmview_claim()) and
  * talks to it through the claim: it sets what the player is at - the view's
  * properties track, playing, position, duration, progress, title, artist,
- * count and rowN.title / .artist / .time -, and takes what was clicked - the
- * events toggle, next, prev and select (a row). The player (player.c) plays
+ * total, and the queue's rows: first, count, rowN.title / .artist / .time -,
+ * and takes what was done - the events toggle, next, prev, select (a row)
+ * and scroll.
+ *
+ * The queue is a window of ROWS tracks over all of them, at `first`: when
+ * the list is scrolled to an end the view asks for more (scroll, +n / -n
+ * tracks), the window moves and the view scrolls its rows back by as many,
+ * so what is seen stays where it is. The player (player.c) plays
  * the files of <music directory>: by default `music` of the card the view is
  * on (/mnt/<card>/music), else of the first card that has one.
  *
@@ -33,7 +39,7 @@
 #define DISPLAY_WAIT_MS 10000u
 #define VIEW_WAIT_MS    30000u
 #define EVENT_WAIT_MS   250u
-#define ROWS            10u             /* Of the view's queue */
+#define ROWS            10u             /* Of the view's queue: a window over the tracks */
 
 /*
  * The view, when none is given: the firmware's (DEFAULT_VIEW), else the one on a
@@ -101,64 +107,84 @@ static void format_time(char* out, size_t size, uint32_t seconds)
     Dmod_SnPrintf(out, size, "%u:%02u", (unsigned)(seconds / 60u), (unsigned)(seconds % 60u));
 }
 
-/* The queue's rows: the ROWS tracks of the page the current one is on */
-static uint32_t show_rows(uint32_t claim, player_t p, int32_t current)
-{
-    uint32_t first = (current > 0) ? ((uint32_t)current / ROWS) * ROWS : 0u;
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < ROWS; i++)
-    {
-        char name[24], time[16] = "";
-        const player_track_t* t = player_track(p, first + i);
-        if (t != NULL)
-        {
-            format_time(time, sizeof(time), t->duration_ms / 1000u);
-            count++;
-        }
-        Dmod_SnPrintf(name, sizeof(name), "row%u.title", (unsigned)i);
-        (void)libdmview_prop_set_string(claim, name, (t != NULL) ? t->title : "");
-        Dmod_SnPrintf(name, sizeof(name), "row%u.artist", (unsigned)i);
-        (void)libdmview_prop_set_string(claim, name, (t != NULL) ? t->artist : "");
-        Dmod_SnPrintf(name, sizeof(name), "row%u.time", (unsigned)i);
-        (void)libdmview_prop_set_string(claim, name, time);
-    }
-    (void)libdmview_prop_set_int(claim, "count", (int32_t)count);
-    return first;
-}
-
 /* What the player is at, into the view: the track when it changed, the time every second */
 typedef struct
 {
     uint32_t    changes;
     int32_t     track;
-    uint32_t    first;          /* Of the rows shown */
+    uint32_t    first;          /* Of the queue's window */
     uint32_t    second;
     uint32_t    duration;
     bool        playing;
     bool        shown;
 } shown_t;
 
+/* The playing track's row in the window, -1: not in it */
+static int32_t row_of(const shown_t* v, int32_t track)
+{
+    return (track >= (int32_t)v->first && track < (int32_t)(v->first + ROWS)) ? track - (int32_t)v->first : -1;
+}
+
+/* The queue's window at `first` (as far as there are tracks): its rows, then where it is */
+static void show_window(uint32_t claim, player_t p, shown_t* v, int64_t first)
+{
+    uint32_t total = player_count(p);
+    int64_t last = (total > ROWS) ? (int64_t)(total - ROWS) : 0;
+    first = (first < 0) ? 0 : (first > last) ? last : first;
+    v->first = (uint32_t)first;
+    uint32_t count = 0;
+    for (uint32_t i = 0; i < ROWS; i++)
+    {
+        char name[24], time[16] = "";
+        player_info_t t = { "", "", 0 };
+        if (player_info(p, v->first + i, &t))
+        {
+            format_time(time, sizeof(time), t.duration_ms / 1000u);
+            count++;
+        }
+        Dmod_SnPrintf(name, sizeof(name), "row%u.title", (unsigned)i);
+        (void)libdmview_prop_set_string(claim, name, t.title);
+        Dmod_SnPrintf(name, sizeof(name), "row%u.artist", (unsigned)i);
+        (void)libdmview_prop_set_string(claim, name, t.artist);
+        Dmod_SnPrintf(name, sizeof(name), "row%u.time", (unsigned)i);
+        (void)libdmview_prop_set_string(claim, name, time);
+    }
+    (void)libdmview_prop_set_int(claim, "count", (int32_t)count);
+    (void)libdmview_prop_set_int(claim, "track", row_of(v, v->track));
+    (void)libdmview_prop_set_int(claim, "first", (int32_t)v->first);   /* (last: the view scrolls by it) */
+}
+
 static void show(uint32_t claim, player_t p, shown_t* v)
 {
     player_state_t st;
     player_state(p, &st);
+    if (!v->shown)
+    {
+        (void)libdmview_prop_set_int(claim, "total", (int32_t)player_count(p));
+        show_window(claim, p, v, 0);
+    }
     if (!v->shown || st.changes != v->changes)
     {
-        const player_track_t* t = (st.track >= 0) ? player_track(p, (uint32_t)st.track) : NULL;
         if (!v->shown || st.track != v->track)
         {
-            uint32_t first = (st.track >= 0) ? ((uint32_t)st.track / ROWS) * ROWS : 0u;
-            if (!v->shown || first != v->first)
-                v->first = show_rows(claim, p, st.track);
-            (void)libdmview_prop_set_string(claim, "title", (t != NULL) ? t->title :
-                                            (player_count(p) == 0) ? "Brak plik\xC3\xB3w MP3" : "");
-            (void)libdmview_prop_set_string(claim, "artist", (t != NULL) ? t->artist : "");
-            (void)libdmview_prop_set_int(claim, "track", (st.track >= 0) ? st.track - (int32_t)v->first : 0);
+            player_info_t t = { (player_count(p) == 0) ? "Brak plik\xC3\xB3w MP3" : "", "", 0 };
+            if (st.track >= 0)
+                (void)player_info(p, (uint32_t)st.track, &t);
+            (void)libdmview_prop_set_string(claim, "title", t.title);
+            (void)libdmview_prop_set_string(claim, "artist", t.artist);
+            v->track = st.track;
+            if (st.track >= 0 && row_of(v, st.track) < 0)
+            {
+                /* Out of the window (the next one, at its end): the window moves to it */
+                int64_t first = (st.track < (int32_t)v->first) ? st.track : (int64_t)st.track - (int64_t)ROWS + 1;
+                show_window(claim, p, v, first);
+            }
+            else
+                (void)libdmview_prop_set_int(claim, "track", row_of(v, st.track));
         }
         if (!v->shown || st.playing != v->playing)
             (void)libdmview_prop_set_int(claim, "playing", st.playing ? 1 : 0);
         v->changes = st.changes;
-        v->track = st.track;
         v->playing = st.playing;
     }
     uint32_t second = st.position_ms / 1000u, duration = st.duration_ms / 1000u;
@@ -174,8 +200,8 @@ static void show(uint32_t claim, player_t p, shown_t* v)
     v->shown = true;
 }
 
-/* What was clicked */
-static void handle(player_t p, const libdmview_event_t* ev, const shown_t* v)
+/* What was done in the view */
+static void handle(uint32_t claim, player_t p, const libdmview_event_t* ev, shown_t* v)
 {
     if (strcmp(ev->name, "toggle") == 0)
         player_toggle(p);
@@ -185,6 +211,8 @@ static void handle(player_t p, const libdmview_event_t* ev, const shown_t* v)
         player_next(p, -1);
     else if (strcmp(ev->name, "select") == 0 && ev->value >= 0)
         player_play(p, v->first + (uint32_t)ev->value);
+    else if (strcmp(ev->name, "scroll") == 0 && v->shown)
+        show_window(claim, p, v, (int64_t)v->first + ev->value);     /* The list at an end: more of it */
 }
 
 int main(int argc, char* argv[])
@@ -255,7 +283,7 @@ int main(int argc, char* argv[])
                 if (p == NULL)
                     continue;
                 if (got == 0)
-                    handle(p, &ev, &shown);
+                    handle(claim, p, &ev, &shown);
                 else if (got == -ENOENT)
                     break;                      /* (the claim is gone - the display with it) */
                 show(claim, p, &shown);

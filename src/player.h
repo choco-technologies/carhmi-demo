@@ -11,15 +11,13 @@
  * (the device's mixer paces it).
  */
 
-#define PLAYER_TEXT     64u
-
+/** What a track shows. Its texts stay as they are until player_free() */
 typedef struct
 {
-    char        path[192];
-    char        title[PLAYER_TEXT];     /* The tag, else the file's name */
-    char        artist[PLAYER_TEXT];
-    uint32_t    duration_ms;
-} player_track_t;
+    const char* title;          /**< The tag, else the file's name (without .mp3) */
+    const char* artist;         /**< "" without the tag */
+    uint32_t    duration_ms;    /**< 0: not known */
+} player_info_t;
 
 typedef struct player* player_t;
 
@@ -33,12 +31,19 @@ typedef struct
     uint32_t    changes;        /**< Grows when the track, or playing, changed */
 } player_state_t;
 
-/** @brief The MP3 files of `dir` (sorted by name), a thread to play them. NULL: out of memory */
+/**
+ * @brief The MP3 files of `dir` (sorted by name), a thread to play them. NULL: out of memory.
+ *
+ * The files are a list (dmlist) of what each takes - its path and names on
+ * the heap -, as many as there are; a track's tags are read when it is
+ * shown (player_info()) or played, not all at the start.
+ */
 player_t player_new(const char* dir);
 void player_free(player_t p);
 
 uint32_t player_count(player_t p);
-const player_track_t* player_track(player_t p, uint32_t index);
+/** @brief What track `index` shows - its tags read the first time it is asked. false: no such track */
+bool player_info(player_t p, uint32_t index, player_info_t* info);
 
 void player_play(player_t p, uint32_t index);      /* From its start */
 void player_toggle(player_t p);

@@ -84,7 +84,7 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
 )
 
 # libdmview: the display claimed, the channel of the claim (0.10).
-# dmmp3: the MP3 files. libdmaudio: playing them.
+# dmmp3: the MP3 files. libdmaudio: playing them. dmlist: the list of the files.
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.7
     dmosi
@@ -92,6 +92,7 @@ dmod_link_modules(${DMOD_MODULE_NAME}
     libsystemd
     dmmp3@>=0.1
     libdmaudio@>=0.1
+    dmlist
 )
 
 enable_testing()
