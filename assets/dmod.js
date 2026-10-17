@@ -88,6 +88,7 @@
         app('total', library.length);
         window_at(0);
         play(0);
+        clock();
     });
 
     window.dmod = {
@@ -119,7 +120,14 @@
         },
     };
 
+    /* The clock: carhmi's is the RTC's, here the browser's */
+    function clock() {
+        const now = new Date();
+        app('clock', String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'));
+    }
+
     setInterval(() => {
+        clock();
         if (!props['playing'])
             return;
         if (props['position'] + 1 >= props['duration'])

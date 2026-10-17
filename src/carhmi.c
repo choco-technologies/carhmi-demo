@@ -3,6 +3,7 @@
 #include "libdmview.h"
 #include "libsystemd.h"
 #include "player.h"
+#include "local_time.h"
 #include <errno.h>
 #include <string.h>
 
@@ -19,7 +20,8 @@
  * properties track, playing, position, duration, progress, title, artist,
  * total, and the queue's rows: first, count, rowN.title / .artist / .time -,
  * and takes what was done - the events toggle, next, prev, select (a row)
- * and scroll.
+ * and scroll. And the time: clock, "HH:MM" of dmutc's UTC in Polish time
+ * (local_time.c), "--:--" while there is no RTC.
  *
  * The queue is a window of ROWS tracks over all of them, at `first`: when
  * the list is scrolled to an end the view asks for more (scroll, +n / -n
@@ -40,6 +42,7 @@
 #define VIEW_WAIT_MS    30000u
 #define EVENT_WAIT_MS   250u
 #define ROWS            20u             /* Of the view's queue: a window over the tracks */
+#define CLOCK_MS        1000u           /* How often the RTC is read */
 
 /*
  * The view, when none is given: the firmware's (DEFAULT_VIEW), else the one on a
@@ -105,6 +108,30 @@ static void music_dir(const char* view, char* dir, size_t size)
 static void format_time(char* out, size_t size, uint32_t seconds)
 {
     Dmod_SnPrintf(out, size, "%u:%02u", (unsigned)(seconds / 60u), (unsigned)(seconds % 60u));
+}
+
+/* The clock, into the view: read once a second, set when its text changed */
+typedef struct
+{
+    Dmod_Timestamp_t    read_at;        /* Uptime, ms */
+    char                text[8];        /* "HH:MM" */
+    bool                shown;
+} wall_t;
+
+static void show_clock(uint32_t claim, wall_t* c)
+{
+    Dmod_Timestamp_t now = Dmod_GetUptime();
+    if (c->shown && now != 0 && now - c->read_at < CLOCK_MS)
+        return;                         /* (an uptime of 0: none, read every time) */
+    char text[sizeof(c->text)];
+    (void)local_time_text(text, sizeof(text));
+    if (!c->shown || strcmp(text, c->text) != 0)
+    {
+        (void)libdmview_prop_set_string(claim, "clock", text);
+        strcpy(c->text, text);
+    }
+    c->read_at = now;
+    c->shown = true;
 }
 
 /* What the player is at, into the view: the track when it changed, the time every second */
@@ -274,18 +301,21 @@ int main(int argc, char* argv[])
                           (unsigned)((p != NULL) ? player_count(p) : 0u), dir);
             shown_t shown;
             memset(&shown, 0, sizeof(shown));
+            wall_t wall;
+            memset(&wall, 0, sizeof(wall));
             if (p != NULL && player_count(p) > 0)
                 player_play(p, 0);
             while (!libsystemd_stop_requested())
             {
                 libdmview_event_t ev;
                 int got = libdmview_wait_event(claim, &ev, (int32_t)EVENT_WAIT_MS);
+                if (got == -ENOENT)
+                    break;                      /* (the claim is gone - the display with it) */
+                show_clock(claim, &wall);
                 if (p == NULL)
                     continue;
                 if (got == 0)
                     handle(claim, p, &ev, &shown);
-                else if (got == -ENOENT)
-                    break;                      /* (the claim is gone - the display with it) */
                 show(claim, p, &shown);
             }
             player_free(p);

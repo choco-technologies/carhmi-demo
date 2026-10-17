@@ -109,7 +109,7 @@
                     <i class="ph-fill ph-user text-slate-400 text-xs"></i> 
                     <span class="font-medium tracking-wide">Kierowca 1</span>
                 </div>
-                <div id="clock" class="font-bold text-[11px] tracking-widest text-white drop-shadow-md">14:32</div>
+                <div id="clock" class="font-bold text-[11px] tracking-widest text-white drop-shadow-md">--:--</div>
                 <div class="flex items-center gap-2">
                     <span class="font-medium">18&deg;C</span>
                     <div class="flex items-center gap-1 text-sky-400">
@@ -628,13 +628,10 @@
 
     <script>
         // --- 1. Zegar (Górny pasek) ---
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('clock').textContent = timeStr;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        // Godzina od aplikacji (carhmi: z RTC przez dmutc), "--:--" gdy jej nie zna
+        const uiClock = document.getElementById('clock');
+        dmod.prop('clock', '--:--');
+        dmod.onchange('clock', () => uiClock.innerText = dmod.get('clock'));
 
         // --- 2. Nawigacja między aplikacjami ---
         const navBtns = document.querySelectorAll('.nav-btn');
