@@ -236,7 +236,7 @@
                             <div class="w-16 h-16 mx-auto rounded-full border-2 border-slate-800 overflow-hidden animate-[spin_6s_linear_infinite] mb-2 shadow-[0_5px_15px_rgba(0,0,0,0.5)] relative">
                                 <div class="absolute inset-0 rounded-full border border-white/10 z-20"></div>
                                 <div class="absolute top-1/2 left-1/2 w-2 h-2 bg-slate-900 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20 ring-1 ring-slate-700"></div>
-                                <img id="home-cover" src="images/cover-default.png" class="w-full h-full object-cover">
+                                <img id="home-cover" src="images/cover-default.png" data-dmod-src="cover" class="w-full h-full object-cover">
                             </div>
                             
                             <div class="relative z-20 text-center w-full">
@@ -312,14 +312,14 @@
                 <!-- WIDOK: MULTIMEDIA / MP3 (Zaktualizowany o Playlistę) -->
                 <div id="view-media" class="view absolute inset-0 w-full h-full p-2 bg-slate-950 overflow-hidden flex gap-2">
                     <!-- Rozmyte tło okładki (Glassmorphism effect) - dynamiczne -->
-                    <img id="media-bg" src="images/cover-default.png" class="absolute inset-0 w-full h-full object-cover opacity-30 blur-2xl">
+                    <img id="media-bg" src="images/cover-default.png" data-dmod-src="cover" class="absolute inset-0 w-full h-full object-cover opacity-30 blur-2xl">
                     <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-slate-950/95"></div>
                     
                     <!-- Lewa kolumna - Now Playing -->
                     <div class="w-[180px] z-10 flex flex-col items-center justify-center bg-slate-900/60 rounded-xl border border-slate-700/50 backdrop-blur-md p-2 shadow-lg">
                         <!-- Okładka -->
                         <div class="w-[90px] h-[90px] rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.6)] overflow-hidden border border-white/10 relative group mb-2">
-                            <img id="now-playing-cover" src="images/cover-default.png" class="w-full h-full object-cover transition-transform duration-500">
+                            <img id="now-playing-cover" src="images/cover-default.png" data-dmod-src="cover" class="w-full h-full object-cover transition-transform duration-500">
                         </div>
                         
                         <div class="text-center w-full px-1">
@@ -350,6 +350,7 @@
                     <div class="flex-1 z-10 flex flex-col h-full bg-slate-900/60 rounded-xl border border-slate-700/50 backdrop-blur-md shadow-lg overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-700/50 bg-slate-800/40 flex justify-between items-center shadow-sm">
                             <span id="queue-label" class="text-[9px] font-bold text-slate-300 uppercase tracking-widest drop-shadow-md">Kolejka (5)</span>
+                            <span id="covers-label" class="block w-[72px] text-right text-[8px] text-slate-500 font-medium"></span>
                             <div class="flex gap-2">
                                 <button class="text-slate-400 hover:text-white transition"><i class="ph-bold ph-shuffle text-[10px]"></i></button>
                                 <button class="text-slate-400 hover:text-white transition"><i class="ph-bold ph-repeat text-[10px]"></i></button>
@@ -360,7 +361,7 @@
                             <!-- Utwory z karty: carhmi wypełnia wiersze (dmod), puste są niewidoczne -->
                             <div id="row-0" class="row row-active flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-0-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row0.cover" class="w-full h-full object-cover">
                                     <div id="row-0-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -371,7 +372,7 @@
                             </div>
                             <div id="row-1" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-1-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row1.cover" class="w-full h-full object-cover">
                                     <div id="row-1-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -382,7 +383,7 @@
                             </div>
                             <div id="row-2" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-2-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row2.cover" class="w-full h-full object-cover">
                                     <div id="row-2-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -393,7 +394,7 @@
                             </div>
                             <div id="row-3" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-3-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row3.cover" class="w-full h-full object-cover">
                                     <div id="row-3-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -404,7 +405,7 @@
                             </div>
                             <div id="row-4" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-4-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row4.cover" class="w-full h-full object-cover">
                                     <div id="row-4-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -415,7 +416,7 @@
                             </div>
                             <div id="row-5" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-5-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row5.cover" class="w-full h-full object-cover">
                                     <div id="row-5-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -426,7 +427,7 @@
                             </div>
                             <div id="row-6" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-6-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row6.cover" class="w-full h-full object-cover">
                                     <div id="row-6-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -437,7 +438,7 @@
                             </div>
                             <div id="row-7" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-7-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row7.cover" class="w-full h-full object-cover">
                                     <div id="row-7-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -448,7 +449,7 @@
                             </div>
                             <div id="row-8" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-8-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row8.cover" class="w-full h-full object-cover">
                                     <div id="row-8-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -459,7 +460,7 @@
                             </div>
                             <div id="row-9" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-9-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row9.cover" class="w-full h-full object-cover">
                                     <div id="row-9-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -470,7 +471,7 @@
                             </div>
                             <div id="row-10" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-10-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row10.cover" class="w-full h-full object-cover">
                                     <div id="row-10-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -481,7 +482,7 @@
                             </div>
                             <div id="row-11" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-11-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row11.cover" class="w-full h-full object-cover">
                                     <div id="row-11-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -492,7 +493,7 @@
                             </div>
                             <div id="row-12" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-12-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row12.cover" class="w-full h-full object-cover">
                                     <div id="row-12-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -503,7 +504,7 @@
                             </div>
                             <div id="row-13" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-13-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row13.cover" class="w-full h-full object-cover">
                                     <div id="row-13-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -514,7 +515,7 @@
                             </div>
                             <div id="row-14" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-14-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row14.cover" class="w-full h-full object-cover">
                                     <div id="row-14-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -525,7 +526,7 @@
                             </div>
                             <div id="row-15" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-15-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row15.cover" class="w-full h-full object-cover">
                                     <div id="row-15-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -536,7 +537,7 @@
                             </div>
                             <div id="row-16" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-16-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row16.cover" class="w-full h-full object-cover">
                                     <div id="row-16-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -547,7 +548,7 @@
                             </div>
                             <div id="row-17" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-17-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row17.cover" class="w-full h-full object-cover">
                                     <div id="row-17-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -558,7 +559,7 @@
                             </div>
                             <div id="row-18" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-18-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row18.cover" class="w-full h-full object-cover">
                                     <div id="row-18-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -569,7 +570,7 @@
                             </div>
                             <div id="row-19" class="row flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border invisible">
                                 <div id="row-19-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
-                                    <img src="images/cover-default.png" class="w-full h-full object-cover">
+                                    <img src="images/cover-default.png" data-dmod-src="row19.cover" class="w-full h-full object-cover">
                                     <div id="row-19-eq" class="row-eq absolute inset-0 bg-black/50 flex items-center justify-center"><div class="flex gap-[1.5px] h-[10px] items-end"><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.8s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_1.1s_infinite_alternate]"></div><div class="w-[2px] h-full bg-indigo-400 rounded-t animate-[bounce_0.9s_infinite_alternate]"></div></div></div>
                                 </div>
                                 <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -670,6 +671,12 @@
     </div>
 
     <script>
+        // Znaki, które aplikacja może pokazać w tekstach (tytuły, wykonawcy, ...) - czcionki
+        // widoku mają tylko znaki ze skryptów strony:
+        // ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789
+        // ĄĆĘŁŃÓŚŹŻ ąćęłńóśźż ÄÖÜäöüß ÉÈÊËéèêëÀÂàâÇçÎÏîïÔôÙÛùûÑñÁÍÚáíú
+        // !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+
         // --- 1. Zegar (Górny pasek) ---
         // Godzina od aplikacji (carhmi: z RTC przez dmutc), "--:--" gdy jej nie zna
         const uiClock = document.getElementById('clock');
@@ -786,6 +793,7 @@
         const uiTimeCurrent = document.getElementById('time-current');
         const uiTimeTotal = document.getElementById('time-total');
         const uiQueue = document.getElementById('queue-label');
+        const uiCovers = document.getElementById('covers-label');
         const homeTitle = document.getElementById('home-title');
         const homeArtist = document.getElementById('home-artist');
         const playIcon = document.getElementById('play-icon');
@@ -837,6 +845,19 @@
         dmod.onchange('playing', showPlaying);
         dmod.onchange('count', showRows);
         dmod.onchange('total', showRows);
+
+        // Okładki: ile utworów już przejrzano (carhmi robi je w tle) - widać, dopóki nie wszystkie
+        dmod.prop('covers.done', 0);
+        dmod.prop('covers.total', 0);
+        function showCovers() {
+            const done = dmod.get('covers.done'), total = dmod.get('covers.total');
+            if (total > 0 && done < total)
+                uiCovers.innerText = 'Okładki ' + done + '/' + total;
+            else
+                uiCovers.innerText = '';
+        }
+        dmod.onchange('covers.done', showCovers);
+        dmod.onchange('covers.total', showCovers);
         for (let i = 0; i < ROWS; i++) {
             dmod.onchange('row' + i + '.title', showRows);
             dmod.onchange('row' + i + '.time', showRows);

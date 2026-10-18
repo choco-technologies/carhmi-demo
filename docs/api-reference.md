@@ -36,6 +36,36 @@ more - the event `scroll`, +10 (-10) -, carhmi moves the window, and the view
 scrolls its rows back by as many: what is seen stays where it is, and the
 next tracks are below it.
 
+Where the music was - the track (its file's name), the second in it, whether
+it played - is kept in `.playing` next to the music
+(`/mnt/<card>/music/.playing`, `playstate.c`): written at once when the track
+or the playing changes, and every 15 seconds while it plays. At the next start
+the same track goes on from there (paused, when it was), the window at it; a
+file that is not there any more: the first track.
+
+## The covers
+
+The front cover of a track's ID3 tag (`dmmp3_find_picture()`; a baseline
+JPEG or a PNG) is shown where the view's own image is - the playing track's
+(`cover`) and the rows' (`rowN.cover`). The view (`data-dmod-src`) says what
+to make of it: the sizes it draws a cover at, with their cuts, round corners
+and blur (`cover.sizes`, `row0.cover.sizes`). carhmi (`covers.c`) decodes the
+picture with dmimg - at the decoder's smallest scale, then averaged down as
+far as the sizes let it - and makes each size with libtodmvi, into
+`.covers/<key>-<size>.dmvi` next to the music; the key is a hash of the
+picture, so the tracks of an album share their files. A cover made once is
+read from the card the next time.
+
+Two threads make them: one what is shown - the playing track, the rows of
+the window - at the views' priority, as soon as it is asked for; the other
+the rest of the tracks, one after another, only when nothing else wants the
+CPU. `covers.done` of `covers.total` tracks are done; the view shows it
+("Okładki 34/212") until they all are. A track without a picture, or with
+one the decoders do not read (a progressive JPEG), keeps the view's image.
+
+The decoders are loaded by name (`dmimg_jpeg`, `dmimg_png`) - they are not in
+carhmi's dependencies: install them with it.
+
 ## The clock
 
 The clock of the top bar is the RTC's: carhmi reads dmutc (`dmutc_get()`)
@@ -76,6 +106,9 @@ the scrolling needs dmview's SCROLLED, 0.12.1):
 | `clock` | carhmi | `HH:MM`, local time (`--:--`: not known) |
 | `volume` | carhmi | 0..100, the master volume (`data-dmod-width`, scale 100) |
 | `muted` | carhmi | 1 while the sound is off |
+| `cover`, `rowN.cover` | carhmi | The image of the playing track, of a row: `<music>/.covers/<key>` (the view adds a size's end), else the view's own |
+| `cover.sizes`, `row0.cover.sizes` | the view | The ends of the files' names of the sizes it shows a cover at (todmvs) |
+| `covers.done`, `covers.total` | carhmi | Tracks whose covers are done, of all |
 
 | Event | Value | What carhmi does |
 |-------|-------|------------------|

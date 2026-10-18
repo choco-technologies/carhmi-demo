@@ -41,4 +41,7 @@ jobs:
         run: |
           export DMOD_DMF_DIR=$(pwd)/build/dmf
           dmf-get install -d ${DMOD_DMF_DIR}/test_carhmi-local.dmd -y
+          # The decoders of the covers: loaded by name, not in a .dmd
+          dmf-get install dmimg_jpeg -y
+          dmf-get install dmimg_png -y
           dmod_loader build/dmf/test_carhmi.dmf
