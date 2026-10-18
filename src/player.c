@@ -14,7 +14,8 @@
  */
 
 #define CHUNK_FRAMES    1152u           /* An MP3 frame */
-#define BUFFER_MS       500u            /* Of the stream: the card's and the drawing's delays */
+#define BUFFER_MS       2000u           /* Of the stream: the card's delays - while another thread has it (a file
+                                           found in a directory of hundreds), the player waited up to a second */
 #define THREAD_STACK    4096u           /* (the decoder's memory is on the heap) */
 #define THREAD_PRIORITY 2               /* Below the audio service (3), above the views (1) */
 #define IDLE_MS         100u
@@ -270,7 +271,7 @@ static void player_thread(void* arg)
         if (n <= 0)
         {
             /* Its end: what is buffered plays out, then the next one */
-            (void)libdmaudio_drain(stream, 2000);
+            (void)libdmaudio_drain(stream, (int32_t)(BUFFER_MS + 500u));
             dmmp3_close(mp3);
             mp3 = NULL;
             dmosi_mutex_lock(p->lock);
