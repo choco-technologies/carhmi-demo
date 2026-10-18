@@ -858,10 +858,17 @@
         }
         dmod.onchange('covers.done', showCovers);
         dmod.onchange('covers.total', showCovers);
+        // 1: okno się przesuwa (i chwilę po tym) - kliknięcie wiersza nie wybiera utworu:
+        // przeciąganie, które przesunięcie przerwało, nie może skończyć się jako "klik"
+        let moving = 0;
+        const SETTLE_MS = 500;
         for (let i = 0; i < ROWS; i++) {
             dmod.onchange('row' + i + '.title', showRows);
             dmod.onchange('row' + i + '.time', showRows);
-            document.getElementById('row-' + i).addEventListener('click', () => dmod.emit('select', i));
+            document.getElementById('row-' + i).addEventListener('click', () => {
+                if (moving === 0)
+                    dmod.emit('select', i);
+            });
         }
 
         // Okno kolejki: przewinięta do końca (początku) prosi o więcej, przesunięta - wraca o tyle
@@ -875,6 +882,7 @@
             list.scrollTop -= (first - shown) * pitch;
             shown = first;
             asked = 0;
+            setTimeout(() => { if (asked === 0) moving = 0; }, SETTLE_MS);
         }
 
         list.addEventListener('scroll', () => {
@@ -882,11 +890,13 @@
                 if (list.scrollTop + list.clientHeight >= list.scrollHeight - pitch / 2) {
                     if (dmod.get('first') + ROWS < dmod.get('total')) {
                         asked = 1;
+                        moving = 1;
                         dmod.emit('scroll', SHIFT);
                     }
                 } else if (list.scrollTop < pitch / 2) {
                     if (dmod.get('first') > 0) {
                         asked = 1;
+                        moving = 1;
                         dmod.emit('scroll', -SHIFT);
                     }
                 }

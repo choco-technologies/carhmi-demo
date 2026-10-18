@@ -45,6 +45,13 @@ uint32_t player_count(player_t p);
 /** @brief What track `index` shows - its tags read the first time it is asked. false: no such track */
 bool player_info(player_t p, uint32_t index, player_info_t* info);
 
+/**
+ * @brief Where the list is: its window's first track. A thread of the player
+ *        reads the tracks' tags ahead of it (after it first, then before),
+ *        so the next window is shown at once
+ */
+void player_prefetch(player_t p, uint32_t first);
+
 /** @brief The file of track `index` (Dmod_Free() it); NULL: no such track, out of memory */
 char* player_path(player_t p, uint32_t index);
 

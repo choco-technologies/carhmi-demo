@@ -204,6 +204,16 @@ static void show_window(uint32_t claim, player_t p, shown_t* v, int64_t first)
     int64_t last = (total > ROWS) ? (int64_t)(total - ROWS) : 0;
     first = (first < 0) ? 0 : (first > last) ? last : first;
     v->first = (uint32_t)first;
+    player_prefetch(p, v->first);
+
+    /* Every row's tags first (read from the card when they are not yet), then
+     * the whole window at once: the rows and where it is together, so the
+     * view never shows the new rows at the old place */
+    for (uint32_t i = 0; i < ROWS; i++)
+    {
+        player_info_t t;
+        (void)player_info(p, v->first + i, &t);
+    }
     uint32_t count = 0;
     for (uint32_t i = 0; i < ROWS; i++)
     {

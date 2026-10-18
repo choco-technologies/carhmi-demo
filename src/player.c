@@ -18,6 +18,9 @@
 #define THREAD_STACK    4096u           /* (the decoder's memory is on the heap) */
 #define THREAD_PRIORITY 2               /* Below the audio service (3), above the views (1) */
 #define IDLE_MS         100u
+#define TAGS_STACK      4096u
+#define TAGS_PRIORITY   0               /* Only when nothing else wants the CPU (it mostly waits for the card) */
+#define TAGS_IDLE_MS    1000u
 #define WRITE_MS        200u
 
 /*
@@ -44,6 +47,11 @@ struct player
     dmosi_thread_t      thread;
     bool                quit;
     bool                done;           /* The thread is out */
+
+    /* The tags' thread: reads them ahead of what is shown (player_prefetch()) */
+    dmosi_thread_t      tags_thread;
+    dmosi_semaphore_t   tags_wake;
+    uint32_t            hint;           /* Where it reads from: the shown window's first track (under lock) */
 
     /* Asked of the thread (under lock) */
     int32_t             current;        /* -1: none */
@@ -319,6 +327,64 @@ static void player_thread(void* arg)
     dmosi_mutex_unlock(p->lock);
 }
 
+/* ---- The tags' thread ---- */
+
+/*
+ * The track nearest to the hint whose tags are not read: the hint and after
+ * it first - where the list goes when it is scrolled down -, then before
+ * it; -1: all are read
+ */
+static int32_t next_unread(player_t p, uint32_t hint)
+{
+    for (uint32_t d = 0; d < p->count; d++)
+    {
+        uint32_t ahead = hint + d;
+        if (ahead < p->count)
+        {
+            track_t* t = track_at(p, ahead);
+            dmosi_mutex_lock(p->lock);
+            bool read = t->read;
+            dmosi_mutex_unlock(p->lock);
+            if (!read)
+                return (int32_t)ahead;
+        }
+        if (d < hint)
+        {
+            track_t* t = track_at(p, hint - 1U - d);
+            dmosi_mutex_lock(p->lock);
+            bool read = t->read;
+            dmosi_mutex_unlock(p->lock);
+            if (!read)
+                return (int32_t)(hint - 1U - d);
+        }
+    }
+    return -1;
+}
+
+/*
+ * Reads the tracks' tags ahead of what is shown, so a window the list moves
+ * to finds them in memory and is shown at once - not after a file of the
+ * card a row
+ */
+static void tags_thread(void* arg)
+{
+    player_t p = arg;
+    for (;;)
+    {
+        dmosi_mutex_lock(p->lock);
+        bool quit = p->quit;
+        uint32_t hint = p->hint;
+        dmosi_mutex_unlock(p->lock);
+        if (quit)
+            break;
+        int32_t index = next_unread(p, hint);
+        if (index < 0)
+            (void)dmosi_semaphore_wait(p->tags_wake, 1, (int32_t)TAGS_IDLE_MS);
+        else
+            read_tags(p, track_at(p, (uint32_t)index));
+    }
+}
+
 /* ---- The player ---- */
 
 player_t player_new(const char* dir)
@@ -331,9 +397,10 @@ player_t player_new(const char* dir)
     p->dir = Dmod_StrDup(dir);
     p->lock = dmosi_mutex_create(false);
     p->wake = dmosi_semaphore_create(0, 8);
+    p->tags_wake = dmosi_semaphore_create(0, 8);
     p->current = -1;
     p->request = -1;
-    if (p->tracks == NULL || p->dir == NULL || p->lock == NULL || p->wake == NULL)
+    if (p->tracks == NULL || p->dir == NULL || p->lock == NULL || p->wake == NULL || p->tags_wake == NULL)
     {
         player_free(p);
         return NULL;
@@ -341,7 +408,9 @@ player_t player_new(const char* dir)
     (void)scan(p, dir);
     p->thread = dmosi_thread_create(player_thread, p, THREAD_PRIORITY, THREAD_STACK, "carhmi_player",
                                     dmosi_process_current());
-    if (p->thread == NULL)
+    p->tags_thread = (p->thread != NULL) ? dmosi_thread_create(tags_thread, p, TAGS_PRIORITY, TAGS_STACK, "carhmi_tags",
+                                                                dmosi_process_current()) : NULL;
+    if (p->thread == NULL || p->tags_thread == NULL)
     {
         player_free(p);
         return NULL;
@@ -362,8 +431,19 @@ void player_free(player_t p)
         (void)dmosi_thread_join(p->thread);
         dmosi_thread_destroy(p->thread);
     }
+    if (p->tags_thread != NULL)
+    {
+        dmosi_mutex_lock(p->lock);
+        p->quit = true;
+        dmosi_mutex_unlock(p->lock);
+        (void)dmosi_semaphore_post(p->tags_wake, 1);
+        (void)dmosi_thread_join(p->tags_thread);
+        dmosi_thread_destroy(p->tags_thread);
+    }
     if (p->wake != NULL)
         dmosi_semaphore_destroy(p->wake);
+    if (p->tags_wake != NULL)
+        dmosi_semaphore_destroy(p->tags_wake);
     if (p->lock != NULL)
         dmosi_mutex_destroy(p->lock);
     if (p->tracks != NULL)
@@ -401,6 +481,18 @@ bool player_info(player_t p, uint32_t index, player_info_t* info)
 static void wake(player_t p)
 {
     (void)dmosi_semaphore_post(p->wake, 1);
+}
+
+void player_prefetch(player_t p, uint32_t first)
+{
+    if (p == NULL)
+        return;
+    dmosi_mutex_lock(p->lock);
+    bool other = p->hint != first;
+    p->hint = first;
+    dmosi_mutex_unlock(p->lock);
+    if (other)
+        (void)dmosi_semaphore_post(p->tags_wake, 1);
 }
 
 char* player_path(player_t p, uint32_t index)
