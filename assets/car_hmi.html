@@ -358,7 +358,7 @@
                         </div>
                         <!-- Kontener przewijalny, przy jego prawym brzegu pasek z pozycją w całej kolejce -->
                         <div class="flex-1 relative">
-                        <div id="playlist-container" class="absolute inset-0 overflow-y-auto p-1 pr-[8px] flex flex-col gap-1" style="scrollbar-width: none;">
+                        <div id="playlist-container" class="absolute inset-0 overflow-y-auto p-1 pr-[12px] flex flex-col gap-1" style="scrollbar-width: none;">
                             <!-- Utwory z karty: carhmi wypełnia wiersze (dmod), puste są niewidoczne -->
                             <div id="row-0" class="row row-active flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-0-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
@@ -582,10 +582,12 @@
                             </div>
                         </div>
                         <!-- Pasek pozycji: kciuk między dwoma odstępami wyższymi od paska - skrypt przewija pasek
-                             (scrollTop) tak, że kciuk stoi tam, gdzie widoczne wiersze są w całej kolejce -->
-                        <div id="queue-bar" class="absolute top-[6px] bottom-[6px] right-[2px] w-[3px] rounded-full bg-slate-700/50 overflow-y-auto" style="scrollbar-width: none;">
+                             (scrollTop) tak, że kciuk stoi tam, gdzie widoczne wiersze są w całej kolejce, a pasek
+                             przeciągnięty palcem przewija kolejkę. Widać 3 px, dotyk łapie 10 px -->
+                        <div class="absolute top-[6px] bottom-[6px] right-[2px] w-[3px] rounded-full bg-slate-700/50"></div>
+                        <div id="queue-bar" class="absolute top-[6px] bottom-[6px] right-0 w-[10px] overflow-y-auto" style="scrollbar-width: none;">
                             <div class="h-[300px]"></div>
-                            <div class="h-[16px] rounded-full bg-indigo-400"></div>
+                            <div class="ml-[5px] w-[3px] h-[16px] rounded-full bg-indigo-400"></div>
                             <div class="h-[300px]"></div>
                         </div>
                         </div>
@@ -767,7 +769,8 @@
         // +/-SHIFT), carhmi przesuwa okno, a widok przewija wiersze z powrotem o tyle -
         // to, co widać, zostaje na miejscu, a pod spodem są już następne utwory. Gdy carhmi
         // przesuwa okno sam (start, grający utwór poza oknem), grający ma w oknie poprzednie
-        // nad sobą, a lista przewija go na górę. Pasek z prawej: gdzie lista jest w całej kolejce.
+        // nad sobą, a lista przewija go na górę. Pasek z prawej: gdzie lista jest w całej kolejce;
+        // przeciągnięty przesuwa okno do utworu, przy którym stanie kciuk (zdarzenie jump).
         const ROWS = 20;
         const SHIFT = 10;
         // Okładka: na razie jedna, domyślna, dla każdego utworu (images/cover-default.png) -
@@ -893,19 +896,45 @@
         const bar = document.getElementById('queue-bar');
         const BAR_SPACE = 300;
         const BAR_THUMB = 16;
+        const DRAG_MS = 400;                // Pasek tyle po ostatnim ruchu palca znów pokazuje, gdzie jest lista
         const SEEN = Math.floor(list.clientHeight / pitch);     // Wierszy widać naraz
+        let barSet = 0;                     // Gdzie pasek przewinął skrypt - to nie palec
+        let dragging = 0;                   // 1: pasek przeciągany, skrypt go nie przestawia
+        let dragTimer = 0;
+        let wanted = 0;                     // Utwór, do którego poproszono o okno (asked 2)
+        let pending = -1;                   // Utwór z paska, o który jeszcze nie poproszono (czekając na okno)
 
         function showBar() {
+            if (dragging === 1)
+                return;
             const top = dmod.get('first') + Math.floor(list.scrollTop / pitch);
             const travel = bar.clientHeight - BAR_THUMB;
             const span = Math.max(dmod.get('total') - SEEN, 1);
-            bar.scrollTop = BAR_SPACE - Math.min(Math.max(Math.floor(top * travel / span), 0), travel);
+            barSet = BAR_SPACE - Math.min(Math.max(Math.floor(top * travel / span), 0), travel);
+            bar.scrollTop = barSet;
+        }
+
+        // Utwór `top` na górze listy: w oknie - przewinięta na miejscu, poza nim - carhmi przesuwa okno (jump)
+        function jumpTo(top) {
+            const first = dmod.get('first');
+            if (top >= first && top - first <= ROWS - SEEN) {
+                list.scrollTop = (top - first) * pitch;
+            } else if (asked !== 0) {
+                pending = top;
+            } else {
+                asked = 2;
+                wanted = top;
+                moving = 1;
+                dmod.emit('jump', top);
+            }
         }
 
         function showFirst() {
             const first = dmod.get('first');
             const track = dmod.get('track');
-            if (asked === 0 && track >= 0)
+            if (asked === 2)
+                list.scrollTop = (wanted - first) * pitch;  // okno przy utworze z paska: on na górze
+            else if (asked === 0 && track >= 0)
                 list.scrollTop = track * pitch;     // carhmi przesunął okno sam (start, grający poza nim): grający na górze, poprzednie nad nim
             else
                 list.scrollTop -= (first - shown) * pitch;
@@ -913,7 +942,24 @@
             asked = 0;
             setTimeout(() => { if (asked === 0) moving = 0; }, SETTLE_MS);
             showBar();
+            if (pending >= 0) {
+                const top = pending;
+                pending = -1;
+                jumpTo(top);
+            }
         }
+
+        // Pasek przeciągnięty palcem (nie przez showBar): kolejka tam, gdzie kciuk
+        bar.addEventListener('scroll', () => {
+            if (bar.scrollTop !== barSet) {
+                dragging = 1;
+                clearTimeout(dragTimer);
+                dragTimer = setTimeout(() => { dragging = 0; showBar(); }, DRAG_MS);
+                const travel = bar.clientHeight - BAR_THUMB;
+                const y = Math.min(Math.max(BAR_SPACE - bar.scrollTop, 0), travel);
+                jumpTo(Math.round(y * Math.max(dmod.get('total') - SEEN, 0) / travel));
+            }
+        });
 
         list.addEventListener('scroll', () => {
             showBar();

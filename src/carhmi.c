@@ -22,8 +22,8 @@
  * talks to it through the claim: it sets what the player is at - the view's
  * properties track, playing, position, duration, progress, title, artist,
  * total, and the queue's rows: first, count, rowN.title / .artist / .time -,
- * and takes what was done - the events toggle, next, prev, select (a row)
- * and scroll. And the time: clock, "HH:MM" of dmutc's UTC in Polish time
+ * and takes what was done - the events toggle, next, prev, select (a row),
+ * scroll and jump. And the time: clock, "HH:MM" of dmutc's UTC in Polish time
  * (local_time.c), "--:--" while there is no RTC. And the volume (volume.c):
  * the properties volume (0 - 100) and muted (0 / 1), the events volume (the
  * new level) and mute. And the album covers (covers.c): the properties cover
@@ -40,7 +40,8 @@
  * so what is seen stays where it is. When carhmi moves it itself - at the
  * start, to the playing track out of it - the track has LEAD rows before it
  * in the window (what is before it is there to be scrolled to) and the view
- * scrolls it to the top. The player (player.c) plays
+ * scrolls it to the top; so does a track the view's position bar was
+ * dragged to (jump, the track). The player (player.c) plays
  * the files of <music directory>: by default `music` of the card the view is
  * on (/mnt/<card>/music), else of the first card that has one.
  *
@@ -412,6 +413,8 @@ static void handle(uint32_t claim, player_t p, const libdmview_event_t* ev, show
         player_play(p, v->first + (uint32_t)ev->value);
     else if (strcmp(ev->name, "scroll") == 0 && v->shown)
         show_window(claim, p, v, (int64_t)v->first + ev->value);     /* The list at an end: more of it */
+    else if (strcmp(ev->name, "jump") == 0 && v->shown)
+        show_window(claim, p, v, (int64_t)ev->value - (int64_t)LEAD); /* The position bar dragged: that track, at the top */
 }
 
 int main(int argc, char* argv[])
