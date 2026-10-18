@@ -37,7 +37,10 @@
  * The queue is a window of ROWS tracks over all of them, at `first`: when
  * the list is scrolled to an end the view asks for more (scroll, +n / -n
  * tracks), the window moves and the view scrolls its rows back by as many,
- * so what is seen stays where it is. The player (player.c) plays
+ * so what is seen stays where it is. When carhmi moves it itself - at the
+ * start, to the playing track out of it - the track has LEAD rows before it
+ * in the window (what is before it is there to be scrolled to) and the view
+ * scrolls it to the top. The player (player.c) plays
  * the files of <music directory>: by default `music` of the card the view is
  * on (/mnt/<card>/music), else of the first card that has one.
  *
@@ -53,6 +56,7 @@
 #define VIEW_WAIT_MS    30000u
 #define EVENT_WAIT_MS   250u
 #define ROWS            20u             /* Of the view's queue: a window over the tracks */
+#define LEAD            10u             /* Rows before the track the window is moved to (as far as there are) */
 #define CLOCK_MS        1000u           /* How often the RTC is read */
 #define COVERS_DIR      ".covers"       /* Of the music directory: the covers made */
 #define PROP_TEXT       256u            /* Bytes of a property's text read from the view, at most */
@@ -243,7 +247,8 @@ static void show(uint32_t claim, player_t p, shown_t* v)
     if (!v->shown)
     {
         (void)libdmview_prop_set_int(claim, "total", (int32_t)player_count(p));
-        show_window(claim, p, v, v->first);         /* (where the track kept is, else 0) */
+        v->track = st.track;                        /* (its row: what the view scrolls to the top) */
+        show_window(claim, p, v, (int64_t)st.track - (int64_t)LEAD);
     }
     if (!v->shown || st.changes != v->changes)
     {
@@ -258,8 +263,7 @@ static void show(uint32_t claim, player_t p, shown_t* v)
             if (st.track >= 0 && row_of(v, st.track) < 0)
             {
                 /* Out of the window (the next one, at its end): the window moves to it */
-                int64_t first = (st.track < (int32_t)v->first) ? st.track : (int64_t)st.track - (int64_t)ROWS + 1;
-                show_window(claim, p, v, first);
+                show_window(claim, p, v, (int64_t)st.track - (int64_t)LEAD);
             }
             else
                 (void)libdmview_prop_set_int(claim, "track", row_of(v, st.track));
@@ -485,7 +489,6 @@ int main(int argc, char* argv[])
             {
                 DMOD_LOG_INFO("carhmi: on with %s at %u s\n", file, (unsigned)(position_ms / 1000u));
                 player_play_at(p, (uint32_t)start, position_ms, playing);
-                shown.first = (uint32_t)start;
             }
             else if (p != NULL && player_count(p) > 0)
                 player_play(p, 0);

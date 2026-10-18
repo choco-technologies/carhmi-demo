@@ -356,8 +356,9 @@
                                 <button class="text-slate-400 hover:text-white transition"><i class="ph-bold ph-repeat text-[10px]"></i></button>
                             </div>
                         </div>
-                        <!-- Kontener przewijalny -->
-                        <div id="playlist-container" class="flex-1 overflow-y-auto p-1 flex flex-col gap-1" style="scrollbar-width: none;">
+                        <!-- Kontener przewijalny, przy jego prawym brzegu pasek z pozycją w całej kolejce -->
+                        <div class="flex-1 relative">
+                        <div id="playlist-container" class="absolute inset-0 overflow-y-auto p-1 pr-[8px] flex flex-col gap-1" style="scrollbar-width: none;">
                             <!-- Utwory z karty: carhmi wypełnia wiersze (dmod), puste są niewidoczne -->
                             <div id="row-0" class="row row-active flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all duration-300 border">
                                 <div id="row-0-frame" class="row-frame w-8 h-8 rounded-md overflow-hidden shrink-0 border relative">
@@ -580,6 +581,14 @@
                                 <div id="row-19-time" class="text-[8px] text-slate-500 font-medium px-1">0:00</div>
                             </div>
                         </div>
+                        <!-- Pasek pozycji: kciuk między dwoma odstępami wyższymi od paska - skrypt przewija pasek
+                             (scrollTop) tak, że kciuk stoi tam, gdzie widoczne wiersze są w całej kolejce -->
+                        <div id="queue-bar" class="absolute top-[6px] bottom-[6px] right-[2px] w-[3px] rounded-full bg-slate-700/50 overflow-y-auto" style="scrollbar-width: none;">
+                            <div class="h-[300px]"></div>
+                            <div class="h-[16px] rounded-full bg-indigo-400"></div>
+                            <div class="h-[300px]"></div>
+                        </div>
+                        </div>
                     </div>
                 </div>
 
@@ -756,7 +765,9 @@
         // Kolejka to okno ROWS wierszy na wszystkie utwory, od `first`: gdy lista dojdzie
         // do końca (albo początku), widok prosi carhmi o kolejne utwory (zdarzenie scroll,
         // +/-SHIFT), carhmi przesuwa okno, a widok przewija wiersze z powrotem o tyle -
-        // to, co widać, zostaje na miejscu, a pod spodem są już następne utwory.
+        // to, co widać, zostaje na miejscu, a pod spodem są już następne utwory. Gdy carhmi
+        // przesuwa okno sam (start, grający utwór poza oknem), grający ma w oknie poprzednie
+        // nad sobą, a lista przewija go na górę. Pasek z prawej: gdzie lista jest w całej kolejce.
         const ROWS = 20;
         const SHIFT = 10;
         // Okładka: na razie jedna, domyślna, dla każdego utworu (images/cover-default.png) -
@@ -877,15 +888,35 @@
         let shown = 0;                      // `first`, jak lista go pokazuje
         let asked = 0;                      // 1: poproszono carhmi o przesunięcie
 
+        // Pasek pozycji: przewinięty o BAR_SPACE - y pokazuje kciuk y px od góry paska (odstępy nad i pod
+        // kciukiem są wyższe od paska); y mówi, gdzie w całej kolejce jest pierwszy widoczny wiersz
+        const bar = document.getElementById('queue-bar');
+        const BAR_SPACE = 300;
+        const BAR_THUMB = 16;
+        const SEEN = Math.floor(list.clientHeight / pitch);     // Wierszy widać naraz
+
+        function showBar() {
+            const top = dmod.get('first') + Math.floor(list.scrollTop / pitch);
+            const travel = bar.clientHeight - BAR_THUMB;
+            const span = Math.max(dmod.get('total') - SEEN, 1);
+            bar.scrollTop = BAR_SPACE - Math.min(Math.max(Math.floor(top * travel / span), 0), travel);
+        }
+
         function showFirst() {
             const first = dmod.get('first');
-            list.scrollTop -= (first - shown) * pitch;
+            const track = dmod.get('track');
+            if (asked === 0 && track >= 0)
+                list.scrollTop = track * pitch;     // carhmi przesunął okno sam (start, grający poza nim): grający na górze, poprzednie nad nim
+            else
+                list.scrollTop -= (first - shown) * pitch;
             shown = first;
             asked = 0;
             setTimeout(() => { if (asked === 0) moving = 0; }, SETTLE_MS);
+            showBar();
         }
 
         list.addEventListener('scroll', () => {
+            showBar();
             if (asked === 0) {
                 if (list.scrollTop + list.clientHeight >= list.scrollHeight - pitch / 2) {
                     if (dmod.get('first') + ROWS < dmod.get('total')) {
@@ -909,6 +940,7 @@
         document.getElementById('prev-btn').addEventListener('click', () => dmod.emit('prev'));
 
         showTime();
+        showBar();
 
         // --- Głośność ---
         // carhmi ustawia `volume` (0-100) i `muted` (0/1); panel tylko mówi, co zrobiono: volume (nowa wartość), mute
