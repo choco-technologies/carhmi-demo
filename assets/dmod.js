@@ -10,6 +10,7 @@
  */
 (function () {
     const ROWS = 20;
+    const LEAD = 10;                    /* Rows before a track the window is moved to */
     const LIBRARY = 40;
     const props = {};
     const listeners = {};
@@ -67,7 +68,7 @@
         app('progress', 0);
         app('playing', 1);
         if (row(track) < 0)
-            window_at(track < first ? track : track - ROWS + 1);
+            window_at(track - LEAD);
         else
             app('track', row(track));
     }
@@ -117,6 +118,8 @@
                 play(first + value);
             else if (name === 'scroll')
                 window_at(first + value);       /* The list at an end: more of it */
+            else if (name === 'jump')
+                window_at(value - LEAD);        /* The position bar dragged: that track, at the top */
             else if (name === 'volume') {       /* A new volume turns the sound on, too */
                 app('volume', Math.max(0, Math.min(100, value)));
                 app('muted', 0);

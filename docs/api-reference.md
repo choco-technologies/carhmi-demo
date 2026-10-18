@@ -41,12 +41,25 @@ next tracks are below it. The rows and `first` are set together. While
 the window moves, and half a second after, a row's click is not taken: a
 drag the move cut short does not end as a tap on a row.
 
+When carhmi moves the window itself - at the start, and when the playing
+track is out of it (the next one after the window's end, one from `next` /
+`prev`) - the track has ten rows before it in the window (as far as there
+are tracks), and the view, seeing `first` change without having asked,
+scrolls the track's row (`track`) to the top: the tracks before it are
+there at once, to be scrolled up to. A bar at the list's right edge shows
+where the first row seen is among all the tracks (`first`, how far the list
+is scrolled, `total`). Dragged, it takes the list to the track its thumb
+stands at: a track in the window is scrolled to, one out of it is asked for
+(the event `jump`, the track), and carhmi moves the window there as it does
+itself - the view scrolls that track to the top.
+
 Where the music was - the track (its file's name), the second in it, whether
 it played - is kept in `.playing` next to the music
 (`/mnt/<card>/music/.playing`, `playstate.c`): written at once when the track
 or the playing changes, and every 15 seconds while it plays. At the next start
-the same track goes on from there (paused, when it was), the window at it; a
-file that is not there any more: the first track.
+the same track goes on from there (paused, when it was), shown at the top of
+the list with the tracks before it above; a file that is not there any more:
+the first track.
 
 ## The covers
 
@@ -121,5 +134,6 @@ the scrolling needs dmview's SCROLLED, 0.12.1):
 | `next`, `prev` | - | The next / previous track, around (the window follows it) |
 | `select` | row | Plays the track of that row of the window |
 | `scroll` | +n / -n | Moves the window by n tracks (as far as there are) |
+| `jump` | track | Moves the window to the track, ten rows before it (as far as there are) |
 | `volume` | 0..100 | Sets the volume (and turns the sound on) |
 | `mute` | - | Mutes, or turns the sound on |
