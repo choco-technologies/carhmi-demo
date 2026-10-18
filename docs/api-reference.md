@@ -25,7 +25,10 @@ error of `libdmview_claim()`.
 The MP3 files of the music directory (sorted by name, as many as there are)
 are the player's queue: a list (dmlist) with a block of each file's name;
 their ID3 tags - the title and the artist (the file's name when there is
-none), the length - are read when a track is shown or played. A thread of
+none), the length - are read when a track is shown or played, and by a
+thread of the player ahead of the shown window (after it first, then before
+it, when nothing else wants the CPU), so a window the list moves to is shown
+at once. A thread of
 carhmi decodes the current one (dmmp3) and plays it through the audio
 service (libdmaudio, on the first audio device); at its end the next one
 starts.
@@ -34,7 +37,9 @@ The view shows twenty rows of the queue: a window over all the tracks, from
 `first`. When the list is scrolled to its end (its start), the view asks for
 more - the event `scroll`, +10 (-10) -, carhmi moves the window, and the view
 scrolls its rows back by as many: what is seen stays where it is, and the
-next tracks are below it.
+next tracks are below it. The rows and `first` are set together. While
+the window moves, and half a second after, a row's click is not taken: a
+drag the move cut short does not end as a tap on a row.
 
 Where the music was - the track (its file's name), the second in it, whether
 it played - is kept in `.playing` next to the music
