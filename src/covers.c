@@ -68,6 +68,7 @@ struct covers
     bool                quit;
     dmosi_mutex_t       lock;
     dmosi_semaphore_t   wake;           /* Something asked for */
+    dmosi_semaphore_t   rest_wake;      /* The thread of the rest: only the end (it has nothing to wait for but time) */
     worker_t            workers[WORKERS];
 };
 
@@ -558,10 +559,8 @@ static void worker_thread(void* arg)
             break;
         if (index < 0)
         {
-            if (w->rest)
-                dmosi_thread_sleep(IDLE_MS);
-            else
-                (void)dmosi_semaphore_wait(c->wake, 1, (int32_t)IDLE_MS);
+            /* (a wait, not a sleep: covers_stop() ends it) */
+            (void)dmosi_semaphore_wait(w->rest ? c->rest_wake : c->wake, 1, (int32_t)IDLE_MS);
             continue;
         }
         uint32_t key = 0;
@@ -591,10 +590,11 @@ covers_t covers_new(player_t p, const char* dir, const char* sizes)
     c->dir = Dmod_StrDup(dir);
     c->lock = dmosi_mutex_create(false);
     c->wake = dmosi_semaphore_create(0, WAKE_MAX);
+    c->rest_wake = dmosi_semaphore_create(0, 1);
     size_t n = (c->count > 0) ? c->count : 1u;
     c->states = Dmod_Malloc(n);
     c->keys = Dmod_Malloc(n * sizeof(uint32_t));
-    if (c->dir == NULL || c->lock == NULL || c->wake == NULL || c->states == NULL || c->keys == NULL || !read_sizes(c, sizes))
+    if (c->dir == NULL || c->lock == NULL || c->wake == NULL || c->rest_wake == NULL || c->states == NULL || c->keys == NULL || !read_sizes(c, sizes))
     {
         covers_free(c);
         return NULL;
@@ -623,7 +623,7 @@ covers_t covers_new(player_t p, const char* dir, const char* sizes)
     return c;
 }
 
-void covers_free(covers_t c)
+void covers_stop(covers_t c)
 {
     if (c == NULL)
         return;
@@ -635,6 +635,15 @@ void covers_free(covers_t c)
     }
     if (c->wake != NULL)
         (void)dmosi_semaphore_post(c->wake, 1);
+    if (c->rest_wake != NULL)
+        (void)dmosi_semaphore_post(c->rest_wake, 1);
+}
+
+void covers_free(covers_t c)
+{
+    if (c == NULL)
+        return;
+    covers_stop(c);
     for (uint32_t i = 0; i < WORKERS; i++)
     {
         if (c->workers[i].thread != NULL)
@@ -645,6 +654,8 @@ void covers_free(covers_t c)
     }
     if (c->wake != NULL)
         dmosi_semaphore_destroy(c->wake);
+    if (c->rest_wake != NULL)
+        dmosi_semaphore_destroy(c->rest_wake);
     if (c->lock != NULL)
         dmosi_mutex_destroy(c->lock);
     for (uint32_t i = 0; c->sizes != NULL && i < c->size_count; i++)

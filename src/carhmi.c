@@ -524,6 +524,10 @@ int main(int argc, char* argv[])
                 playstate_update(resume, (st.track >= 0) ? player_file(p, (uint32_t)st.track) : NULL, st.position_ms,
                                  st.playing, Dmod_GetUptime());
             }
+            /* The threads are asked to stop all at once, then waited for: the waits overlap (the covers' one
+             * finishes the cover it is on, the tags' one the file it reads) */
+            covers_stop(covers.covers);
+            player_stop(p);
             stop_covers(&covers);
             playstate_free(resume);
             volume_free(volume);

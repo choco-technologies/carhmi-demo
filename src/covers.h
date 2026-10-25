@@ -34,6 +34,9 @@ covers_t covers_new(player_t p, const char* dir, const char* sizes);
 /** @brief Stop the thread and free it (safe on NULL) */
 void covers_free(covers_t c);
 
+/** Asks the threads to stop and returns at once (covers_free() waits for them; this lets that overlap with other stops) */
+void covers_stop(covers_t c);
+
 /**
  * @brief Ask for the cover of track `index`: it is made when the thread gets
  *        to it - the one asked `first` before all the others
