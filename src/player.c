@@ -419,25 +419,34 @@ player_t player_new(const char* dir)
     return p;
 }
 
-void player_free(player_t p)
+void player_stop(player_t p)
 {
     if (p == NULL)
         return;
-    if (p->thread != NULL)
+    if (p->lock != NULL)
     {
         dmosi_mutex_lock(p->lock);
         p->quit = true;
         dmosi_mutex_unlock(p->lock);
+    }
+    if (p->wake != NULL)
         (void)dmosi_semaphore_post(p->wake, 1);
+    if (p->tags_wake != NULL)
+        (void)dmosi_semaphore_post(p->tags_wake, 1);
+}
+
+void player_free(player_t p)
+{
+    if (p == NULL)
+        return;
+    player_stop(p);
+    if (p->thread != NULL)
+    {
         (void)dmosi_thread_join(p->thread);
         dmosi_thread_destroy(p->thread);
     }
     if (p->tags_thread != NULL)
     {
-        dmosi_mutex_lock(p->lock);
-        p->quit = true;
-        dmosi_mutex_unlock(p->lock);
-        (void)dmosi_semaphore_post(p->tags_wake, 1);
         (void)dmosi_thread_join(p->tags_thread);
         dmosi_thread_destroy(p->tags_thread);
     }

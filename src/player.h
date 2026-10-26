@@ -41,6 +41,9 @@ typedef struct
 player_t player_new(const char* dir);
 void player_free(player_t p);
 
+/** Asks the threads to stop and returns at once (player_free() waits for them; this lets that overlap with other stops) */
+void player_stop(player_t p);
+
 uint32_t player_count(player_t p);
 /** @brief What track `index` shows - its tags read the first time it is asked. false: no such track */
 bool player_info(player_t p, uint32_t index, player_info_t* info);
