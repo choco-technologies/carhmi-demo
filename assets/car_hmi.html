@@ -33,6 +33,15 @@
     </script>
 
     <style>
+        /* The native view compiles :active to $box.pressed: feedback is local
+           to the display and starts before the application handles the click. */
+        button { touch-action:manipulation; }
+        button:active { background-color:#30567b; opacity:0.68; transition:none; }
+        #view-games button:active { background:#bce2d5; border-color:#26877c; color:#19584f; opacity:1; }
+        #view-games #literki-start:active { background:#145f57; color:white; }
+        .lesson-loading { position:absolute; inset:0; display:flex; align-items:center;
+            justify-content:center; color:#69817d; font-size:8px; pointer-events:none; }
+
         /* Płynne przejścia dla widoków aplikacji */
         .view {
             position: absolute;
@@ -214,6 +223,95 @@
             #climate-functions button { width:42px; }
             #climate-fan { padding:6px; gap:4px; }
         }
+
+        /* Picture-led literacy game. Fixed geometry is shared by browser and DMV. */
+        #view-games { background:#f8f6ef; color:#233c42; }
+        .lesson-hidden { opacity:0; pointer-events:none; }
+        .lesson-layer { position:absolute; inset:0; }
+        .games-eyebrow { position:absolute; left:18px; top:13px; font-size:9px; font-weight:800; letter-spacing:1px; color:#387d76; }
+        .games-heading { position:absolute; left:18px; top:30px; font-size:27px; font-weight:800; }
+        .games-note { position:absolute; right:18px; top:42px; font-size:9px; color:#778b87; }
+        #literki-card { position:absolute; left:16px; top:75px; width:398px; height:137px; border-radius:16px; background:white; border:1px solid #e0e7df; }
+        #literki-cover { position:absolute; left:10px; top:15px; width:108px; height:108px; object-fit:contain; }
+        #literki-badge { position:absolute; left:88px; top:7px; width:38px; height:38px; border-radius:12px; background:#efc66b; color:#604921; display:flex; align-items:center; justify-content:center; font-size:25px; font-weight:800; }
+        #literki-name { position:absolute; left:142px; top:15px; font-size:25px; font-weight:800; }
+        #literki-desc { position:absolute; left:143px; top:49px; font-size:10px; color:#657e7d; }
+        #literki-start { position:absolute; left:142px; top:80px; width:219px; height:40px; border-radius:11px; background:#26877c; color:white; font-size:15px; font-weight:800; }
+        #games-footer { position:absolute; left:18px; top:226px; font-size:9px; color:#748b85; }
+        #lesson-top { position:absolute; left:0; top:0; width:100%; height:38px; background:#eaf0e8; }
+        .lesson-icon { position:absolute; top:4px; width:36px; height:30px; border-radius:9px; background:white; color:#387d76; font-size:18px; }
+        #lesson-back { left:7px; } #lesson-repeat { right:7px; }
+        #lesson-title { position:absolute; left:50px; top:4px; width:330px; text-align:center; font-size:13px; font-weight:800; }
+        #lesson-score { position:absolute; left:50px; top:22px; width:330px; text-align:center; font-size:8px; color:#56776f; }
+        #lesson-first { position:absolute; left:0; top:38px; width:100%; height:169px; }
+        #lesson-object-card { position:absolute; left:15px; top:12px; width:146px; height:146px; background:white; border-radius:14px; }
+        #lesson-object { position:absolute; left:9px; top:9px; width:128px; height:128px; object-fit:contain; }
+        .lesson-letter { position:absolute; top:44px; width:70px; height:88px; background:white; border:2px solid #e0e6e0; border-radius:13px; font-size:39px; font-weight:800; color:#356b68; }
+        #lesson-letter0 { left:179px; } #lesson-letter1 { left:260px; } #lesson-letter2 { left:341px; }
+        #lesson-images { position:absolute; left:0; top:38px; width:100%; height:169px; }
+        #lesson-target { position:absolute; left:15px; top:0; width:400px; height:54px; text-align:center; font-size:34px; font-weight:800; color:#34796f; }
+        .lesson-picture { position:absolute; top:62px; width:120px; height:104px; border:2px solid #e0e6e0; border-radius:13px; background:white; }
+        #lesson-picture0 { left:16px; } #lesson-picture1 { left:155px; } #lesson-picture2 { left:294px; }
+        .lesson-picture img { position:absolute; width:92px; height:92px; left:12px; top:4px; object-fit:contain; }
+        #lesson-spell { position:absolute; left:0; top:38px; width:100%; height:210px; }
+        #lesson-spell-frame { position:absolute; left:19px; top:8px; width:84px; height:84px; }
+        #lesson-spell-image { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; border-radius:10px; }
+        #lesson-assembled { position:absolute; left:119px; top:28px; width:292px; height:33px; text-align:center; font-size:18px; font-weight:800; color:#356b68; }
+        #lesson-undo { position:absolute; right:14px; top:66px; height:27px; width:64px; border-radius:8px; background:#e9eee6; font-size:10px; font-weight:700; }
+        #lesson-tiles { position:absolute; left:14px; top:111px; width:402px; height:88px; }
+        .lesson-tile { position:absolute; width:44px; height:38px; border-radius:9px; background:white; border:1px solid #d9e5df; font-size:23px; font-weight:800; color:#34796f; }
+        .lesson-used { background:#e2e8df; border-color:#e2e8df; }
+        #lesson-status { position:absolute; left:12px; top:222px; width:406px; height:21px; text-align:center; font-size:10px; font-weight:700; color:#69817d; border-radius:8px; }
+        #lesson-status.spelling { top:132px; }
+        #lesson-status.correct { background:#d8edcf; color:#397438; }
+        #lesson-status.retry { color:#b17932; }
+        @media (max-width: 400px) {
+            .games-eyebrow { left:12px; top:12px; font-size:8px; }
+            .games-heading { left:12px; top:30px; font-size:24px; }
+            .games-note { right:12px; top:44px; font-size:8px; }
+            #literki-card { left:10px; top:72px; width:260px; height:116px; border-radius:13px; }
+            #literki-cover { left:3px; top:16px; width:80px; height:80px; }
+            #literki-badge { left:61px; top:10px; width:28px; height:28px; border-radius:8px; font-size:19px; }
+            #literki-name { left:100px; top:15px; font-size:22px; }
+            #literki-desc { left:101px; top:46px; width:150px; font-size:8px; }
+            #literki-start { left:100px; top:72px; width:144px; height:32px; font-size:13px; }
+            #games-footer { left:12px; top:200px; font-size:8px; }
+            #lesson-title, #lesson-score { width:184px; left:48px; }
+            #lesson-title { top:5px; font-size:11px; }
+            #lesson-score { top:23px; font-size:8px; }
+            #lesson-first { height:144px; }
+            #lesson-object-card { left:8px; top:22px; width:104px; height:104px; border-radius:11px; }
+            #lesson-object { left:6px; top:6px; width:92px; height:92px; }
+            .lesson-letter { top:39px; width:47px; height:70px; font-size:28px; border-radius:10px; }
+            #lesson-letter0 { left:120px; } #lesson-letter1 { left:172px; } #lesson-letter2 { left:224px; }
+            #lesson-target { left:8px; top:5px; width:264px; height:43px; font-size:27px; }
+            .lesson-picture { top:57px; width:82px; height:86px; border-radius:11px; }
+            #lesson-picture0 { left:8px; } #lesson-picture1 { left:99px; } #lesson-picture2 { left:190px; }
+            .lesson-picture img { width:74px; height:74px; left:2px; top:4px; }
+            #lesson-spell-frame { left:10px; top:8px; width:68px; height:68px; }
+            #lesson-assembled { left:88px; top:24px; width:183px; font-size:12px; height:26px; }
+            #lesson-undo { right:9px; top:60px; width:55px; height:24px; font-size:9px; }
+            #lesson-tiles { left:8px; top:106px; width:264px; height:70px; }
+            .lesson-tile { width:29px; height:31px; border-radius:7px; font-size:19px; }
+            #lesson-status { left:6px; top:193px; width:268px; height:19px; font-size:8px; }
+            #lesson-status.spelling { top:129px; }
+            #lesson-tile0 { left:0px !important; top:0px !important; }
+            #lesson-tile1 { left:33px !important; top:0px !important; }
+            #lesson-tile2 { left:66px !important; top:0px !important; }
+            #lesson-tile3 { left:99px !important; top:0px !important; }
+            #lesson-tile4 { left:132px !important; top:0px !important; }
+            #lesson-tile5 { left:165px !important; top:0px !important; }
+            #lesson-tile6 { left:198px !important; top:0px !important; }
+            #lesson-tile7 { left:231px !important; top:0px !important; }
+            #lesson-tile8 { left:0px !important; top:35px !important; }
+            #lesson-tile9 { left:33px !important; top:35px !important; }
+            #lesson-tile10 { left:66px !important; top:35px !important; }
+            #lesson-tile11 { left:99px !important; top:35px !important; }
+            #lesson-tile12 { left:132px !important; top:35px !important; }
+            #lesson-tile13 { left:165px !important; top:35px !important; }
+            #lesson-tile14 { left:198px !important; top:35px !important; }
+            #lesson-tile15 { left:231px !important; top:35px !important; }
+        }
     </style>
 </head>
 
@@ -292,11 +390,73 @@
                 <button class="nav-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 relative text-slate-400 hover:text-slate-200" data-target="sounds">
                     <i class="ph-bold ph-waveform text-xl"></i>
                 </button>
+                <button id="games-nav" aria-label="Gry" class="nav-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 relative text-slate-400" data-target="games">
+                    <i class="ph-bold ph-game-controller text-xl"></i>
+                </button>
             </nav>
 
             <!-- Główny obszar zawartości -->
             <div id="hmi-content" class="absolute top-[24px] left-[50px] w-[430px] h-[248px] bg-slate-950 overflow-hidden">
                 
+
+                <!-- WIDOK: GRY / LITERKI -->
+                <div id="view-games" class="view absolute inset-0 w-full h-full overflow-hidden">
+                    <div id="games-menu" class="lesson-layer">
+                        <div class="games-eyebrow">MAŁE KROKI, WIELKIE ODKRYCIA</div>
+                        <div class="games-heading">Gry</div><div class="games-note">Uczymy się przez zabawę</div>
+                        <div id="literki-card">
+                            <img id="literki-cover" src="games/literki/images/arbuz.png" alt="Arbuz">
+                            <div id="literki-badge">A</div>
+                            <div id="literki-name">Literki</div>
+                            <div id="literki-desc">Obrazki, literki i pierwsze słowa</div>
+                            <button id="literki-start">Zagraj <span>→</span></button>
+                        </div>
+                        <div id="games-footer">Słuchaj, wybieraj i zbieraj gwiazdki</div>
+                    </div>
+                    <div id="game-play" class="lesson-layer lesson-hidden">
+                        <div id="lesson-top">
+                            <button id="lesson-back" aria-label="Wróć do gier" class="lesson-icon">‹</button>
+                            <div id="lesson-title">Pierwsza literka</div><div id="lesson-score">Gwiazdki: 0</div>
+                            <button id="lesson-repeat" aria-label="Posłuchaj jeszcze raz" class="lesson-icon"><i class="ph-bold ph-speaker-high"></i></button>
+                        </div>
+                        <div id="lesson-first">
+                            <div id="lesson-object-card"><span class="lesson-loading" aria-hidden="true">Ładuję…</span><img id="lesson-object" src="games/literki/images/arbuz.png" data-dmod-src="game.object" alt="Obrazek zadania"></div>
+                            <button id="lesson-letter0" class="lesson-letter">A</button>
+                            <button id="lesson-letter1" class="lesson-letter">B</button>
+                            <button id="lesson-letter2" class="lesson-letter">C</button>
+                        </div>
+                        <div id="lesson-images" class="lesson-hidden">
+                            <div id="lesson-target">A</div>
+                            <button id="lesson-picture0" class="lesson-picture" aria-label="Obrazek 1"><span class="lesson-loading" aria-hidden="true">Ładuję…</span><img src="games/literki/images/arbuz.png" data-dmod-src="game.picture0" alt="Odpowiedź obrazkowa"></button>
+                            <button id="lesson-picture1" class="lesson-picture" aria-label="Obrazek 2"><span class="lesson-loading" aria-hidden="true">Ładuję…</span><img src="games/literki/images/arbuz.png" data-dmod-src="game.picture1" alt="Odpowiedź obrazkowa"></button>
+                            <button id="lesson-picture2" class="lesson-picture" aria-label="Obrazek 3"><span class="lesson-loading" aria-hidden="true">Ładuję…</span><img src="games/literki/images/arbuz.png" data-dmod-src="game.picture2" alt="Odpowiedź obrazkowa"></button>
+                        </div>
+                        <div id="lesson-spell" class="lesson-hidden">
+                            <div id="lesson-spell-frame"><span class="lesson-loading" aria-hidden="true">Ładuję…</span><img id="lesson-spell-image" src="games/literki/images/arbuz.png" data-dmod-src="game.spell_image" alt="Ułóż nazwę tego obrazka"></div>
+                            <div id="lesson-assembled">_ _ _ _ _</div><button id="lesson-undo">Cofnij</button>
+                            <div id="lesson-tiles">
+                                <button id="lesson-tile0" class="lesson-tile" style="left:0px;top:0px">A</button>
+                                <button id="lesson-tile1" class="lesson-tile" style="left:51px;top:0px">A</button>
+                                <button id="lesson-tile2" class="lesson-tile" style="left:102px;top:0px">A</button>
+                                <button id="lesson-tile3" class="lesson-tile" style="left:153px;top:0px">A</button>
+                                <button id="lesson-tile4" class="lesson-tile" style="left:204px;top:0px">A</button>
+                                <button id="lesson-tile5" class="lesson-tile" style="left:255px;top:0px">A</button>
+                                <button id="lesson-tile6" class="lesson-tile" style="left:306px;top:0px">A</button>
+                                <button id="lesson-tile7" class="lesson-tile" style="left:357px;top:0px">A</button>
+                                <button id="lesson-tile8" class="lesson-tile" style="left:0px;top:44px">A</button>
+                                <button id="lesson-tile9" class="lesson-tile" style="left:51px;top:44px">A</button>
+                                <button id="lesson-tile10" class="lesson-tile" style="left:102px;top:44px">A</button>
+                                <button id="lesson-tile11" class="lesson-tile" style="left:153px;top:44px">A</button>
+                                <button id="lesson-tile12" class="lesson-tile" style="left:204px;top:44px">A</button>
+                                <button id="lesson-tile13" class="lesson-tile" style="left:255px;top:44px">A</button>
+                                <button id="lesson-tile14" class="lesson-tile" style="left:306px;top:44px">A</button>
+                                <button id="lesson-tile15" class="lesson-tile" style="left:357px;top:44px">A</button>
+                            </div>
+                        </div>
+                        <div id="lesson-status">Jaką literką zaczyna się to słowo?</div>
+                    </div>
+                </div>
+
                 <!-- WIDOK: HOME / DASHBOARD -->
                 <div id="view-home" class="view absolute inset-0 flex w-full h-full p-2.5 gap-2 transition-all duration-300">
                     
@@ -888,6 +1048,64 @@
         // ĄĆĘŁŃÓŚŹŻ ąćęłńóśźż ÄÖÜäöüß ÉÈÊËéèêëÀÂàâÇçÎÏîïÔôÙÛùûÑñÁÍÚáíú
         // !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 
+
+        // Literki: properties form one committed snapshot, published through game.revision.
+        // AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ aąbcćdeęfghijklłmnńoóprsśtuwyzźż _ ‹ →
+        dmod.prop('game.active', 0); dmod.prop('game.mode', 0); dmod.prop('game.solved', 0);
+        dmod.prop('game.wrong', 0); dmod.prop('game.round', 0); dmod.prop('game.length', 0); dmod.prop('game.used', 0);
+        dmod.prop('game.title', 'Pierwsza literka'); dmod.prop('game.score', 'Gwiazdki: 0');
+        dmod.prop('game.target', 'A'); dmod.prop('game.status', 'Jaką literką zaczyna się to słowo?');
+        dmod.prop('game.assembled', '_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _');
+        for (let i = 0; i < 3; i++) dmod.prop('game.letter' + i, 'A');
+        for (let i = 0; i < 16; i++) dmod.prop('game.tile' + i, 'A');
+        // Claims apply pending properties in declaration order: commit must be last.
+        dmod.prop('game.revision', 0);
+        function showLesson() {
+            if (dmod.get('game.active')) {
+                document.getElementById('games-menu').classList.add('lesson-hidden');
+                document.getElementById('game-play').classList.remove('lesson-hidden');
+            } else {
+                document.getElementById('games-menu').classList.remove('lesson-hidden');
+                document.getElementById('game-play').classList.add('lesson-hidden');
+            }
+            const mode = dmod.get('game.mode');
+            if (mode === 0) document.getElementById('lesson-first').classList.remove('lesson-hidden');
+            else document.getElementById('lesson-first').classList.add('lesson-hidden');
+            if (mode === 1 || mode === 3) document.getElementById('lesson-images').classList.remove('lesson-hidden');
+            else document.getElementById('lesson-images').classList.add('lesson-hidden');
+            if (mode === 2) document.getElementById('lesson-spell').classList.remove('lesson-hidden');
+            else document.getElementById('lesson-spell').classList.add('lesson-hidden');
+            document.getElementById('lesson-title').innerText = dmod.get('game.title');
+            document.getElementById('lesson-score').innerText = dmod.get('game.score');
+            document.getElementById('lesson-target').innerText = dmod.get('game.target');
+            document.getElementById('lesson-assembled').innerText = dmod.get('game.assembled');
+            const status = document.getElementById('lesson-status');
+            status.innerText = dmod.get('game.status');
+            if (mode === 2) status.classList.add('spelling'); else status.classList.remove('spelling');
+            if (dmod.get('game.solved')) status.classList.add('correct'); else status.classList.remove('correct');
+            if (dmod.get('game.wrong')) status.classList.add('retry'); else status.classList.remove('retry');
+            for (let i = 0; i < 3; i++) document.getElementById('lesson-letter' + i).innerText = dmod.get('game.letter' + i);
+            let tileFlag = 1;
+            for (let i = 0; i < 16; i++) {
+                const tile = document.getElementById('lesson-tile' + i);
+                tile.innerText = dmod.get('game.tile' + i);
+                if (i < dmod.get('game.length')) tile.classList.remove('lesson-hidden'); else tile.classList.add('lesson-hidden');
+                if (Math.floor(dmod.get('game.used') / tileFlag) % 2 === 1) tile.classList.add('lesson-used'); else tile.classList.remove('lesson-used');
+                tileFlag = tileFlag * 2;
+            }
+        }
+        function lessonAnswer(choice) { dmod.emit('game.answer', dmod.get('game.round') * 16 + choice); }
+        document.getElementById('literki-start').addEventListener('click', () => dmod.emit('game.start', 0));
+        document.getElementById('lesson-back').addEventListener('click', () => dmod.emit('game.back', 0));
+        document.getElementById('lesson-repeat').addEventListener('click', () => dmod.emit('game.repeat', 0));
+        document.getElementById('lesson-undo').addEventListener('click', () => dmod.emit('game.undo', 0));
+        for (let i = 0; i < 3; i++) {
+            document.getElementById('lesson-letter' + i).addEventListener('click', () => lessonAnswer(i));
+            document.getElementById('lesson-picture' + i).addEventListener('click', () => lessonAnswer(i));
+        }
+        for (let i = 0; i < 16; i++) document.getElementById('lesson-tile' + i).addEventListener('click', () => lessonAnswer(i));
+        dmod.onchange('game.revision', showLesson);
+
         // --- 1. Zegar (Górny pasek) ---
         // Godzina od aplikacji (carhmi: z RTC przez dmutc), "--:--" gdy jej nie zna
         const uiClock = document.getElementById('clock');
@@ -914,6 +1132,8 @@
                 
                 // Pokazanie wybranego widoku
                 const target = btn.getAttribute('data-target');
+                if (target === 'games') dmod.emit('game.enter', 0);
+                else dmod.emit('game.leave', 0);
                 document.getElementById('view-' + target).classList.add('active');
                 
                 // Zresetuj animację prędkościomierza, jeśli wchodzimy na ekran główny
@@ -1476,5 +1696,7 @@
         sirenBtn.addEventListener('click', () => dmod.emit('siren'));
         showSounds();
     </script>
+    <script src="literki-data.js"></script>
+    <script src="literki.js"></script>
 </body>
 </html>

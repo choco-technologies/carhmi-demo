@@ -1,0 +1,578 @@
+welcome.mp3
+Cześć! Pobawmy się literkami. Posłuchaj i wybierz odpowiedź.
+
+read.mp3
+Przeczytaj wyraz i wybierz pasujący obrazek.
+
+again.mp3
+Spróbuj jeszcze raz. Dasz radę!
+
+bravo.mp3
+Brawo! Świetnie ci poszło!
+
+first_arbuz.mp3
+Jaką literką zaczyna się słowo: arbuz?
+
+spell_arbuz.mp3
+Ułóż z literek słowo: arbuz.
+
+first_ananas.mp3
+Jaką literką zaczyna się słowo: ananas?
+
+spell_ananas.mp3
+Ułóż z literek słowo: ananas.
+
+first_aparat.mp3
+Jaką literką zaczyna się słowo: aparat?
+
+spell_aparat.mp3
+Ułóż z literek słowo: aparat.
+
+first_banan.mp3
+Jaką literką zaczyna się słowo: banan?
+
+spell_banan.mp3
+Ułóż z literek słowo: banan.
+
+first_balon.mp3
+Jaką literką zaczyna się słowo: balon?
+
+spell_balon.mp3
+Ułóż z literek słowo: balon.
+
+first_but.mp3
+Jaką literką zaczyna się słowo: but?
+
+spell_but.mp3
+Ułóż z literek słowo: but.
+
+first_cytryna.mp3
+Jaką literką zaczyna się słowo: cytryna?
+
+spell_cytryna.mp3
+Ułóż z literek słowo: cytryna.
+
+first_cebula.mp3
+Jaką literką zaczyna się słowo: cebula?
+
+spell_cebula.mp3
+Ułóż z literek słowo: cebula.
+
+first_cukierek.mp3
+Jaką literką zaczyna się słowo: cukierek?
+
+spell_cukierek.mp3
+Ułóż z literek słowo: cukierek.
+
+first_cma.mp3
+Jaką literką zaczyna się słowo: ćma?
+
+spell_cma.mp3
+Ułóż z literek słowo: ćma.
+
+first_cwikla.mp3
+Jaką literką zaczyna się słowo: ćwikła?
+
+spell_cwikla.mp3
+Ułóż z literek słowo: ćwikła.
+
+first_cwiek.mp3
+Jaką literką zaczyna się słowo: ćwiek?
+
+spell_cwiek.mp3
+Ułóż z literek słowo: ćwiek.
+
+first_dom.mp3
+Jaką literką zaczyna się słowo: dom?
+
+spell_dom.mp3
+Ułóż z literek słowo: dom.
+
+first_dynia.mp3
+Jaką literką zaczyna się słowo: dynia?
+
+spell_dynia.mp3
+Ułóż z literek słowo: dynia.
+
+first_delfin.mp3
+Jaką literką zaczyna się słowo: delfin?
+
+spell_delfin.mp3
+Ułóż z literek słowo: delfin.
+
+first_ekran.mp3
+Jaką literką zaczyna się słowo: ekran?
+
+spell_ekran.mp3
+Ułóż z literek słowo: ekran.
+
+first_ekierka.mp3
+Jaką literką zaczyna się słowo: ekierka?
+
+spell_ekierka.mp3
+Ułóż z literek słowo: ekierka.
+
+first_ekspres.mp3
+Jaką literką zaczyna się słowo: ekspres?
+
+spell_ekspres.mp3
+Ułóż z literek słowo: ekspres.
+
+first_foka.mp3
+Jaką literką zaczyna się słowo: foka?
+
+spell_foka.mp3
+Ułóż z literek słowo: foka.
+
+first_flet.mp3
+Jaką literką zaczyna się słowo: flet?
+
+spell_flet.mp3
+Ułóż z literek słowo: flet.
+
+first_fotel.mp3
+Jaką literką zaczyna się słowo: fotel?
+
+spell_fotel.mp3
+Ułóż z literek słowo: fotel.
+
+first_gruszka.mp3
+Jaką literką zaczyna się słowo: gruszka?
+
+spell_gruszka.mp3
+Ułóż z literek słowo: gruszka.
+
+first_gitara.mp3
+Jaką literką zaczyna się słowo: gitara?
+
+spell_gitara.mp3
+Ułóż z literek słowo: gitara.
+
+first_garnek.mp3
+Jaką literką zaczyna się słowo: garnek?
+
+spell_garnek.mp3
+Ułóż z literek słowo: garnek.
+
+first_helikopter.mp3
+Jaką literką zaczyna się słowo: helikopter?
+
+spell_helikopter.mp3
+Ułóż z literek słowo: helikopter.
+
+first_hulajnoga.mp3
+Jaką literką zaczyna się słowo: hulajnoga?
+
+spell_hulajnoga.mp3
+Ułóż z literek słowo: hulajnoga.
+
+first_hamak.mp3
+Jaką literką zaczyna się słowo: hamak?
+
+spell_hamak.mp3
+Ułóż z literek słowo: hamak.
+
+first_igla.mp3
+Jaką literką zaczyna się słowo: igła?
+
+spell_igla.mp3
+Ułóż z literek słowo: igła.
+
+first_indyk.mp3
+Jaką literką zaczyna się słowo: indyk?
+
+spell_indyk.mp3
+Ułóż z literek słowo: indyk.
+
+first_irys.mp3
+Jaką literką zaczyna się słowo: irys?
+
+spell_irys.mp3
+Ułóż z literek słowo: irys.
+
+first_jablko.mp3
+Jaką literką zaczyna się słowo: jabłko?
+
+spell_jablko.mp3
+Ułóż z literek słowo: jabłko.
+
+first_jajko.mp3
+Jaką literką zaczyna się słowo: jajko?
+
+spell_jajko.mp3
+Ułóż z literek słowo: jajko.
+
+first_jez.mp3
+Jaką literką zaczyna się słowo: jeż?
+
+spell_jez.mp3
+Ułóż z literek słowo: jeż.
+
+first_kot.mp3
+Jaką literką zaczyna się słowo: kot?
+
+spell_kot.mp3
+Ułóż z literek słowo: kot.
+
+first_krowa.mp3
+Jaką literką zaczyna się słowo: krowa?
+
+spell_krowa.mp3
+Ułóż z literek słowo: krowa.
+
+first_klocki.mp3
+Jaką literką zaczyna się słowo: klocki?
+
+spell_klocki.mp3
+Ułóż z literek słowo: klocki.
+
+first_lalka.mp3
+Jaką literką zaczyna się słowo: lalka?
+
+spell_lalka.mp3
+Ułóż z literek słowo: lalka.
+
+first_lis.mp3
+Jaką literką zaczyna się słowo: lis?
+
+spell_lis.mp3
+Ułóż z literek słowo: lis.
+
+first_lody.mp3
+Jaką literką zaczyna się słowo: lody?
+
+spell_lody.mp3
+Ułóż z literek słowo: lody.
+
+first_lodka.mp3
+Jaką literką zaczyna się słowo: łódka?
+
+spell_lodka.mp3
+Ułóż z literek słowo: łódka.
+
+first_lyzka.mp3
+Jaką literką zaczyna się słowo: łyżka?
+
+spell_lyzka.mp3
+Ułóż z literek słowo: łyżka.
+
+first_lopata.mp3
+Jaką literką zaczyna się słowo: łopata?
+
+spell_lopata.mp3
+Ułóż z literek słowo: łopata.
+
+first_mama.mp3
+Jaką literką zaczyna się słowo: mama?
+
+spell_mama.mp3
+Ułóż z literek słowo: mama.
+
+first_mis.mp3
+Jaką literką zaczyna się słowo: miś?
+
+spell_mis.mp3
+Ułóż z literek słowo: miś.
+
+first_motyl.mp3
+Jaką literką zaczyna się słowo: motyl?
+
+spell_motyl.mp3
+Ułóż z literek słowo: motyl.
+
+first_nos.mp3
+Jaką literką zaczyna się słowo: nos?
+
+spell_nos.mp3
+Ułóż z literek słowo: nos.
+
+first_narty.mp3
+Jaką literką zaczyna się słowo: narty?
+
+spell_narty.mp3
+Ułóż z literek słowo: narty.
+
+first_nozyczki.mp3
+Jaką literką zaczyna się słowo: nożyczki?
+
+spell_nozyczki.mp3
+Ułóż z literek słowo: nożyczki.
+
+first_oko.mp3
+Jaką literką zaczyna się słowo: oko?
+
+spell_oko.mp3
+Ułóż z literek słowo: oko.
+
+first_owca.mp3
+Jaką literką zaczyna się słowo: owca?
+
+spell_owca.mp3
+Ułóż z literek słowo: owca.
+
+first_osa.mp3
+Jaką literką zaczyna się słowo: osa?
+
+spell_osa.mp3
+Ułóż z literek słowo: osa.
+
+first_pies.mp3
+Jaką literką zaczyna się słowo: pies?
+
+spell_pies.mp3
+Ułóż z literek słowo: pies.
+
+first_pilka.mp3
+Jaką literką zaczyna się słowo: piłka?
+
+spell_pilka.mp3
+Ułóż z literek słowo: piłka.
+
+first_parasol.mp3
+Jaką literką zaczyna się słowo: parasol?
+
+spell_parasol.mp3
+Ułóż z literek słowo: parasol.
+
+first_ryba.mp3
+Jaką literką zaczyna się słowo: ryba?
+
+spell_ryba.mp3
+Ułóż z literek słowo: ryba.
+
+first_rak.mp3
+Jaką literką zaczyna się słowo: rak?
+
+spell_rak.mp3
+Ułóż z literek słowo: rak.
+
+first_rower.mp3
+Jaką literką zaczyna się słowo: rower?
+
+spell_rower.mp3
+Ułóż z literek słowo: rower.
+
+first_slon.mp3
+Jaką literką zaczyna się słowo: słoń?
+
+spell_slon.mp3
+Ułóż z literek słowo: słoń.
+
+first_ser.mp3
+Jaką literką zaczyna się słowo: ser?
+
+spell_ser.mp3
+Ułóż z literek słowo: ser.
+
+first_sowa.mp3
+Jaką literką zaczyna się słowo: sowa?
+
+spell_sowa.mp3
+Ułóż z literek słowo: sowa.
+
+first_slimak.mp3
+Jaką literką zaczyna się słowo: ślimak?
+
+spell_slimak.mp3
+Ułóż z literek słowo: ślimak.
+
+first_swinka.mp3
+Jaką literką zaczyna się słowo: świnka?
+
+spell_swinka.mp3
+Ułóż z literek słowo: świnka.
+
+first_swieca.mp3
+Jaką literką zaczyna się słowo: świeca?
+
+spell_swieca.mp3
+Ułóż z literek słowo: świeca.
+
+first_tata.mp3
+Jaką literką zaczyna się słowo: tata?
+
+spell_tata.mp3
+Ułóż z literek słowo: tata.
+
+first_tort.mp3
+Jaką literką zaczyna się słowo: tort?
+
+spell_tort.mp3
+Ułóż z literek słowo: tort.
+
+first_tygrys.mp3
+Jaką literką zaczyna się słowo: tygrys?
+
+spell_tygrys.mp3
+Ułóż z literek słowo: tygrys.
+
+first_ucho.mp3
+Jaką literką zaczyna się słowo: ucho?
+
+spell_ucho.mp3
+Ułóż z literek słowo: ucho.
+
+first_ul.mp3
+Jaką literką zaczyna się słowo: ul?
+
+spell_ul.mp3
+Ułóż z literek słowo: ul.
+
+first_usta.mp3
+Jaką literką zaczyna się słowo: usta?
+
+spell_usta.mp3
+Ułóż z literek słowo: usta.
+
+first_waz.mp3
+Jaką literką zaczyna się słowo: wąż?
+
+spell_waz.mp3
+Ułóż z literek słowo: wąż.
+
+first_wiadro.mp3
+Jaką literką zaczyna się słowo: wiadro?
+
+spell_wiadro.mp3
+Ułóż z literek słowo: wiadro.
+
+first_widelec.mp3
+Jaką literką zaczyna się słowo: widelec?
+
+spell_widelec.mp3
+Ułóż z literek słowo: widelec.
+
+first_zebra.mp3
+Jaką literką zaczyna się słowo: zebra?
+
+spell_zebra.mp3
+Ułóż z literek słowo: zebra.
+
+first_zegar.mp3
+Jaką literką zaczyna się słowo: zegar?
+
+spell_zegar.mp3
+Ułóż z literek słowo: zegar.
+
+first_zamek.mp3
+Jaką literką zaczyna się słowo: zamek?
+
+spell_zamek.mp3
+Ułóż z literek słowo: zamek.
+
+first_zrebak.mp3
+Jaką literką zaczyna się słowo: źrebak?
+
+spell_zrebak.mp3
+Ułóż z literek słowo: źrebak.
+
+first_zrenica.mp3
+Jaką literką zaczyna się słowo: źrenica?
+
+spell_zrenica.mp3
+Ułóż z literek słowo: źrenica.
+
+first_zdzblo.mp3
+Jaką literką zaczyna się słowo: źdźbło?
+
+spell_zdzblo.mp3
+Ułóż z literek słowo: źdźbło.
+
+first_zaba.mp3
+Jaką literką zaczyna się słowo: żaba?
+
+spell_zaba.mp3
+Ułóż z literek słowo: żaba.
+
+first_zolw.mp3
+Jaką literką zaczyna się słowo: żółw?
+
+spell_zolw.mp3
+Ułóż z literek słowo: żółw.
+
+first_zaglowka.mp3
+Jaką literką zaczyna się słowo: żaglówka?
+
+spell_zaglowka.mp3
+Ułóż z literek słowo: żaglówka.
+
+letter_00.mp3
+Wybierz obrazek na literę A.
+
+letter_01.mp3
+Wybierz obrazek na literę B.
+
+letter_02.mp3
+Wybierz obrazek na literę C.
+
+letter_03.mp3
+Wybierz obrazek na literę Ć.
+
+letter_04.mp3
+Wybierz obrazek na literę D.
+
+letter_05.mp3
+Wybierz obrazek na literę E.
+
+letter_06.mp3
+Wybierz obrazek na literę F.
+
+letter_07.mp3
+Wybierz obrazek na literę G.
+
+letter_08.mp3
+Wybierz obrazek na literę H.
+
+letter_09.mp3
+Wybierz obrazek na literę I.
+
+letter_10.mp3
+Wybierz obrazek na literę J.
+
+letter_11.mp3
+Wybierz obrazek na literę K.
+
+letter_12.mp3
+Wybierz obrazek na literę L.
+
+letter_13.mp3
+Wybierz obrazek na literę Ł.
+
+letter_14.mp3
+Wybierz obrazek na literę M.
+
+letter_15.mp3
+Wybierz obrazek na literę N.
+
+letter_16.mp3
+Wybierz obrazek na literę O.
+
+letter_17.mp3
+Wybierz obrazek na literę P.
+
+letter_18.mp3
+Wybierz obrazek na literę R.
+
+letter_19.mp3
+Wybierz obrazek na literę S.
+
+letter_20.mp3
+Wybierz obrazek na literę Ś.
+
+letter_21.mp3
+Wybierz obrazek na literę T.
+
+letter_22.mp3
+Wybierz obrazek na literę U.
+
+letter_23.mp3
+Wybierz obrazek na literę W.
+
+letter_24.mp3
+Wybierz obrazek na literę Z.
+
+letter_25.mp3
+Wybierz obrazek na literę Ź.
+
+letter_26.mp3
+Wybierz obrazek na literę Ż.

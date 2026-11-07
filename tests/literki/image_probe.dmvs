@@ -1,0 +1,8 @@
+.view literki_image_probe
+.size 128, 128
+.entry draw
+.prop $picture, str[192], "", "picture"
+draw:
+        FILL #FF00FF
+        IMAGE 0, 0, 128, 128, $picture, CENTER|MIDDLE
+        RET

@@ -10,6 +10,7 @@
 #include "playstate.h"
 #include "sfx.h"
 #include "fuel.h"
+#include "games.h"
 #include <errno.h>
 #include <string.h>
 
@@ -555,6 +556,7 @@ int main(int argc, char* argv[])
             volume_shown_t volume_shown = { -1, -1, -1 };
             bool volume_logged = false;
             playstate_t resume = playstate_new(dir);
+            games_t games = games_new(claim, view, p, sfx);
             bool music_started = false;
             Dmod_Timestamp_t began = Dmod_GetUptime();
             while (!libsystemd_stop_requested())
@@ -565,9 +567,12 @@ int main(int argc, char* argv[])
                     break;                      /* (the claim is gone - the display with it) */
                 show_clock(claim, &wall);
                 fuel_update(&fuel, Dmod_GetUptime());
-                bool taken = got == 0 && fuel_event(&fuel, ev.name);
-                if (sfx_engine_wanted(sfx) != fuel.engine_on)
-                    sfx_engine_set(sfx, fuel.engine_on);
+                bool taken = got == 0 && games_event(games, &ev, (uint32_t)Dmod_GetUptime());
+                games_update(games, (uint32_t)Dmod_GetUptime());
+                taken = taken || (got == 0 && fuel_event(&fuel, ev.name));
+                bool engine_audible = fuel.engine_on && !games_is_open(games);
+                if (sfx_engine_wanted(sfx) != engine_audible)
+                    sfx_engine_set(sfx, engine_audible);
                 int32_t level = fuel_level(&fuel);
                 if (level != fuel_shown)
                     (void)libdmview_prop_set_int(claim, "fuel.level", fuel_shown = level);
@@ -578,10 +583,10 @@ int main(int argc, char* argv[])
                 int32_t warning = fuel_warning_visible(&fuel) ? 1 : 0;
                 if (warning != fuel_warning_shown)
                     (void)libdmview_prop_set_int(claim, "fuel.warning", fuel_warning_shown = warning);
-                bool pumping = fuel.visible && fuel.stage == FUEL_PUMPING;
+                bool pumping = fuel.visible && fuel.stage == FUEL_PUMPING && !games_is_open(games);
                 if (pumping != pump_shown)
                     sfx_pump_set(sfx, pump_shown = pumping);
-                if (!music_started && p != NULL && (sfx_engine_started(sfx) || Dmod_GetUptime() - began >= MUSIC_WAIT_MS))
+                if (!music_started && !games_is_open(games) && p != NULL && (sfx_engine_started(sfx) || Dmod_GetUptime() - began >= MUSIC_WAIT_MS))
                 {
                     start_music(p, resume);
                     music_started = true;
@@ -614,6 +619,7 @@ int main(int argc, char* argv[])
             }
             /* The threads are asked to stop all at once, then waited for: the waits overlap (the covers' one
              * finishes the cover it is on, the tags' one the file it reads) */
+            games_free(games);
             sfx_stop(sfx);
             covers_stop(covers.covers);
             player_stop(p);

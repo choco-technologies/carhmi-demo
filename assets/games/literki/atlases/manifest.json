@@ -1,0 +1,101 @@
+{
+  "abc.png": [
+    "arbuz",
+    "ananas",
+    "aparat",
+    "banan",
+    "balon",
+    "but",
+    "cytryna",
+    "cebula",
+    "cukierek"
+  ],
+  "cde.png": [
+    "cma",
+    "cwikla",
+    "cwiek",
+    "dom",
+    "dynia",
+    "delfin",
+    "ekran",
+    "ekierka",
+    "ekspres"
+  ],
+  "fgh.png": [
+    "foka",
+    "flet",
+    "fotel",
+    "gruszka",
+    "gitara",
+    "garnek",
+    "helikopter",
+    "hulajnoga",
+    "hamak"
+  ],
+  "ijk.png": [
+    "igla",
+    "indyk",
+    "irys",
+    "jablko",
+    "jajko",
+    "jez",
+    "kot",
+    "krowa",
+    "klocki"
+  ],
+  "llm.png": [
+    "lalka",
+    "lis",
+    "lody",
+    "lodka",
+    "lyzka",
+    "lopata",
+    "mama",
+    "mis",
+    "motyl"
+  ],
+  "nop.png": [
+    "nos",
+    "narty",
+    "nozyczki",
+    "oko",
+    "owca",
+    "osa",
+    "pies",
+    "pilka",
+    "parasol"
+  ],
+  "rss.png": [
+    "ryba",
+    "rak",
+    "rower",
+    "slon",
+    "ser",
+    "sowa",
+    "slimak",
+    "swinka",
+    "swieca"
+  ],
+  "tuw.png": [
+    "tata",
+    "tort",
+    "tygrys",
+    "ucho",
+    "ul",
+    "usta",
+    "waz",
+    "wiadro",
+    "widelec"
+  ],
+  "zzz.png": [
+    "zebra",
+    "zegar",
+    "zamek",
+    "zrebak",
+    "zrenica",
+    "zdzblo",
+    "zaba",
+    "zolw",
+    "zaglowka"
+  ]
+}

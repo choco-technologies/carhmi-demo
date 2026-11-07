@@ -1,0 +1,472 @@
+{
+  "title": "Literki",
+  "alphabet": "AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ",
+  "omitted": {
+    "Ą": "Brak prostych słów rozpoczynających się od tej litery.",
+    "Ę": "Brak prostych słów rozpoczynających się od tej litery.",
+    "Ń": "Brak prostych słów rozpoczynających się od tej litery.",
+    "Ó": "Pomijana w podstawowym zestawie: za mało różnych, prostych do zilustrowania rzeczowników.",
+    "Y": "Pomijana w podstawowym zestawie: za mało prostych, swojskich przykładów."
+  },
+  "groups": [
+    {
+      "letter": "A",
+      "words": [
+        {
+          "id": "arbuz",
+          "word": "arbuz"
+        },
+        {
+          "id": "ananas",
+          "word": "ananas"
+        },
+        {
+          "id": "aparat",
+          "word": "aparat"
+        }
+      ]
+    },
+    {
+      "letter": "B",
+      "words": [
+        {
+          "id": "banan",
+          "word": "banan"
+        },
+        {
+          "id": "balon",
+          "word": "balon"
+        },
+        {
+          "id": "but",
+          "word": "but"
+        }
+      ]
+    },
+    {
+      "letter": "C",
+      "words": [
+        {
+          "id": "cytryna",
+          "word": "cytryna"
+        },
+        {
+          "id": "cebula",
+          "word": "cebula"
+        },
+        {
+          "id": "cukierek",
+          "word": "cukierek"
+        }
+      ]
+    },
+    {
+      "letter": "Ć",
+      "words": [
+        {
+          "id": "cma",
+          "word": "ćma"
+        },
+        {
+          "id": "cwikla",
+          "word": "ćwikła"
+        },
+        {
+          "id": "cwiek",
+          "word": "ćwiek"
+        }
+      ]
+    },
+    {
+      "letter": "D",
+      "words": [
+        {
+          "id": "dom",
+          "word": "dom"
+        },
+        {
+          "id": "dynia",
+          "word": "dynia"
+        },
+        {
+          "id": "delfin",
+          "word": "delfin"
+        }
+      ]
+    },
+    {
+      "letter": "E",
+      "words": [
+        {
+          "id": "ekran",
+          "word": "ekran"
+        },
+        {
+          "id": "ekierka",
+          "word": "ekierka"
+        },
+        {
+          "id": "ekspres",
+          "word": "ekspres"
+        }
+      ]
+    },
+    {
+      "letter": "F",
+      "words": [
+        {
+          "id": "foka",
+          "word": "foka"
+        },
+        {
+          "id": "flet",
+          "word": "flet"
+        },
+        {
+          "id": "fotel",
+          "word": "fotel"
+        }
+      ]
+    },
+    {
+      "letter": "G",
+      "words": [
+        {
+          "id": "gruszka",
+          "word": "gruszka"
+        },
+        {
+          "id": "gitara",
+          "word": "gitara"
+        },
+        {
+          "id": "garnek",
+          "word": "garnek"
+        }
+      ]
+    },
+    {
+      "letter": "H",
+      "words": [
+        {
+          "id": "helikopter",
+          "word": "helikopter"
+        },
+        {
+          "id": "hulajnoga",
+          "word": "hulajnoga"
+        },
+        {
+          "id": "hamak",
+          "word": "hamak"
+        }
+      ]
+    },
+    {
+      "letter": "I",
+      "words": [
+        {
+          "id": "igla",
+          "word": "igła"
+        },
+        {
+          "id": "indyk",
+          "word": "indyk"
+        },
+        {
+          "id": "irys",
+          "word": "irys"
+        }
+      ]
+    },
+    {
+      "letter": "J",
+      "words": [
+        {
+          "id": "jablko",
+          "word": "jabłko"
+        },
+        {
+          "id": "jajko",
+          "word": "jajko"
+        },
+        {
+          "id": "jez",
+          "word": "jeż"
+        }
+      ]
+    },
+    {
+      "letter": "K",
+      "words": [
+        {
+          "id": "kot",
+          "word": "kot"
+        },
+        {
+          "id": "krowa",
+          "word": "krowa"
+        },
+        {
+          "id": "klocki",
+          "word": "klocki"
+        }
+      ]
+    },
+    {
+      "letter": "L",
+      "words": [
+        {
+          "id": "lalka",
+          "word": "lalka"
+        },
+        {
+          "id": "lis",
+          "word": "lis"
+        },
+        {
+          "id": "lody",
+          "word": "lody"
+        }
+      ]
+    },
+    {
+      "letter": "Ł",
+      "words": [
+        {
+          "id": "lodka",
+          "word": "łódka"
+        },
+        {
+          "id": "lyzka",
+          "word": "łyżka"
+        },
+        {
+          "id": "lopata",
+          "word": "łopata"
+        }
+      ]
+    },
+    {
+      "letter": "M",
+      "words": [
+        {
+          "id": "mama",
+          "word": "mama"
+        },
+        {
+          "id": "mis",
+          "word": "miś"
+        },
+        {
+          "id": "motyl",
+          "word": "motyl"
+        }
+      ]
+    },
+    {
+      "letter": "N",
+      "words": [
+        {
+          "id": "nos",
+          "word": "nos"
+        },
+        {
+          "id": "narty",
+          "word": "narty"
+        },
+        {
+          "id": "nozyczki",
+          "word": "nożyczki"
+        }
+      ]
+    },
+    {
+      "letter": "O",
+      "words": [
+        {
+          "id": "oko",
+          "word": "oko"
+        },
+        {
+          "id": "owca",
+          "word": "owca"
+        },
+        {
+          "id": "osa",
+          "word": "osa"
+        }
+      ]
+    },
+    {
+      "letter": "P",
+      "words": [
+        {
+          "id": "pies",
+          "word": "pies"
+        },
+        {
+          "id": "pilka",
+          "word": "piłka"
+        },
+        {
+          "id": "parasol",
+          "word": "parasol"
+        }
+      ]
+    },
+    {
+      "letter": "R",
+      "words": [
+        {
+          "id": "ryba",
+          "word": "ryba"
+        },
+        {
+          "id": "rak",
+          "word": "rak"
+        },
+        {
+          "id": "rower",
+          "word": "rower"
+        }
+      ]
+    },
+    {
+      "letter": "S",
+      "words": [
+        {
+          "id": "slon",
+          "word": "słoń"
+        },
+        {
+          "id": "ser",
+          "word": "ser"
+        },
+        {
+          "id": "sowa",
+          "word": "sowa"
+        }
+      ]
+    },
+    {
+      "letter": "Ś",
+      "words": [
+        {
+          "id": "slimak",
+          "word": "ślimak"
+        },
+        {
+          "id": "swinka",
+          "word": "świnka"
+        },
+        {
+          "id": "swieca",
+          "word": "świeca"
+        }
+      ]
+    },
+    {
+      "letter": "T",
+      "words": [
+        {
+          "id": "tata",
+          "word": "tata"
+        },
+        {
+          "id": "tort",
+          "word": "tort"
+        },
+        {
+          "id": "tygrys",
+          "word": "tygrys"
+        }
+      ]
+    },
+    {
+      "letter": "U",
+      "words": [
+        {
+          "id": "ucho",
+          "word": "ucho"
+        },
+        {
+          "id": "ul",
+          "word": "ul"
+        },
+        {
+          "id": "usta",
+          "word": "usta"
+        }
+      ]
+    },
+    {
+      "letter": "W",
+      "words": [
+        {
+          "id": "waz",
+          "word": "wąż"
+        },
+        {
+          "id": "wiadro",
+          "word": "wiadro"
+        },
+        {
+          "id": "widelec",
+          "word": "widelec"
+        }
+      ]
+    },
+    {
+      "letter": "Z",
+      "words": [
+        {
+          "id": "zebra",
+          "word": "zebra"
+        },
+        {
+          "id": "zegar",
+          "word": "zegar"
+        },
+        {
+          "id": "zamek",
+          "word": "zamek"
+        }
+      ]
+    },
+    {
+      "letter": "Ź",
+      "words": [
+        {
+          "id": "zrebak",
+          "word": "źrebak"
+        },
+        {
+          "id": "zrenica",
+          "word": "źrenica"
+        },
+        {
+          "id": "zdzblo",
+          "word": "źdźbło"
+        }
+      ]
+    },
+    {
+      "letter": "Ż",
+      "words": [
+        {
+          "id": "zaba",
+          "word": "żaba"
+        },
+        {
+          "id": "zolw",
+          "word": "żółw"
+        },
+        {
+          "id": "zaglowka",
+          "word": "żaglówka"
+        }
+      ]
+    }
+  ]
+}

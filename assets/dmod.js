@@ -85,6 +85,11 @@
     let track = 0;                      /* Playing, of the library */
 
     function changed(name) {
+        if (typeof props[name] === 'string' && props[name].startsWith('lit_')) {
+            document.querySelectorAll('[data-dmod-src="' + name + '"]').forEach(image => {
+                image.src = 'games/literki/images/' + props[name].slice(4) + '.png';
+            });
+        }
         (listeners[name] || []).forEach(fn => fn());
         if (name === 'fuel.level') {
             const liquid = document.getElementById('fuel-liquid');
@@ -167,6 +172,7 @@
     });
 
     window.dmod = {
+        publish: app,
         prop(name, initial) {
             if (!(name in props))
                 props[name] = initial;

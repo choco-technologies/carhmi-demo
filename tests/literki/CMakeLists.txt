@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.18)
+project(letters_core_tests C)
+enable_testing()
+add_executable(letters_core_tests letters_core_tests.c ../../src/letters.c)
+target_include_directories(letters_core_tests PRIVATE ../../src)
+target_compile_options(letters_core_tests PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+add_test(NAME letters_core_tests COMMAND letters_core_tests)

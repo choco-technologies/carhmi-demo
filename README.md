@@ -100,6 +100,23 @@ with a full tank.
 The HTML browser preview mirrors the interaction with local Web Audio;
 the device synthesizes the pump alongside the engine and music.
 
+## Games: Literki
+
+The gamepad in the left sidebar opens **Gry**, with one game: **Literki**.
+It has 81 original pictures (three for each of 27 Polish initial letters),
+including **mama**, **tata** and **dom**, and four randomly mixed activities:
+choose an initial letter, match a letter to a picture, arrange spelling tiles,
+and read a word to select its picture. Correct answers earn a star, a chime
+and applause. Music and car sounds are paused while the games panel is open.
+
+Polish female-voice recordings can be generated from
+[the ElevenLabs CSV](docs/games/elevenlabs.csv) or
+[the copyable text list](docs/games/teksty-do-nagran.txt), with 193 named MP3
+files. Place them in `assets/games/literki/audio/`; the build packages them
+with both view variants. Without these recordings the STM32 still plays the
+reward sounds; browser preview can use a local Polish speech voice.
+See [the game, recording and testing guide](docs/games/literki.md).
+
 ## Building
 
 ```bash

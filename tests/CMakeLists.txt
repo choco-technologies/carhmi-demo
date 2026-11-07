@@ -78,3 +78,45 @@ if(DMF_GET_EXECUTABLE AND DMOD_LOADER_EXECUTABLE)
         set_tests_properties(test_navigation_${SCREEN} PROPERTIES FIXTURES_REQUIRED navigation)
     endforeach()
 endif()
+
+# Real input/renderer/controller test; audio endpoints are observed stubs.
+set(DMOD_MODULE_NAME test_literki_input)
+set(DMOD_STACK_SIZE 4096)
+dmod_add_executable(${DMOD_MODULE_NAME} ${PROJECT_VERSION}
+    literki_input.c ../src/games.c ../src/letters.c)
+target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+dmod_link_modules(${DMOD_MODULE_NAME} libdmview@>=0.15.1 dmdrvi)
+if(DMF_GET_EXECUTABLE AND DMOD_LOADER_EXECUTABLE)
+    add_test(NAME test_literki_dependencies
+        COMMAND ${CMAKE_COMMAND} -E env DMOD_DMF_DIR=${DMOD_DMF_DIR}
+            ${DMF_GET_EXECUTABLE} install -d ${DMOD_DMF_DIR}/test_literki_input-local.dmd -y ${NAVIGATION_MANIFEST_ARGS})
+    set_tests_properties(test_literki_dependencies PROPERTIES FIXTURES_SETUP literki)
+    foreach(SCREEN IN ITEMS 480x272 320x240)
+        add_test(NAME test_literki_${SCREEN}
+            COMMAND ${CMAKE_COMMAND} -E env DMOD_DMF_DIR=${DMOD_DMF_DIR}
+                ${DMOD_LOADER_EXECUTABLE} ${DMOD_DMF_DIR}/test_literki_input.dmf
+                --args ${CMAKE_BINARY_DIR}/views/${SCREEN}/carhmi.dmv)
+        set_tests_properties(test_literki_${SCREEN} PROPERTIES FIXTURES_REQUIRED literki)
+    endforeach()
+endif()
+
+set(DMOD_MODULE_NAME test_literki_sound)
+set(DMOD_STACK_SIZE 3072)
+dmod_add_executable(${DMOD_MODULE_NAME} ${PROJECT_VERSION}
+    literki_sound.c ../src/lesson_audio.c ../src/sfx_synth.c)
+target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+dmod_link_modules(${DMOD_MODULE_NAME} dmosi dmdrvi dmmp3 libdmaudio)
+
+# Exhaustive binary and pixel audit for the exact 480x272 deployment assets.
+set(IMAGE_AUDIT_HEADER ${CMAKE_CURRENT_BINARY_DIR}/literki_image_audit.inc)
+add_custom_command(OUTPUT ${IMAGE_AUDIT_HEADER}
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_literki_image_audit.py
+        ${CMAKE_BINARY_DIR}/views/480x272 ${IMAGE_AUDIT_HEADER}
+    DEPENDS carhmi_view ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_literki_image_audit.py
+    VERBATIM)
+set(DMOD_MODULE_NAME test_literki_images)
+set(DMOD_STACK_SIZE 3072)
+dmod_add_executable(${DMOD_MODULE_NAME} ${PROJECT_VERSION} literki_images.c ${IMAGE_AUDIT_HEADER})
+add_dependencies(${DMOD_MODULE_NAME} carhmi_view)
+target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+dmod_link_modules(${DMOD_MODULE_NAME} libdmview dmosi dmdrvi)

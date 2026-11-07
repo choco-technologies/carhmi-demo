@@ -150,7 +150,9 @@ static void sync_fuel(uint32_t claim, const fuel_t* tank)
 static void fuel_action(uint32_t claim, fuel_t* tank, const char* wanted)
 {
     libdmview_event_t event;
-    int rc = libdmview_wait_event(claim, &event, 0);
+    int rc;
+    do { rc = libdmview_wait_event(claim, &event, 0); }
+    while (rc == 0 && strncmp(event.name, "game.", 5) == 0);
     if (rc != 0 || strcmp(event.name, wanted) != 0)
     {
         Dmod_Printf("FAIL fuel event: rc=%d actual=%s wanted=%s\n", rc, rc == 0 ? event.name : "none", wanted);
@@ -159,7 +161,9 @@ static void fuel_action(uint32_t claim, fuel_t* tank, const char* wanted)
     }
     fuel_event(tank, event.name);
     sync_fuel(claim, tank);
-    if (libdmview_wait_event(claim, &event, 0) == 0)
+    do { rc = libdmview_wait_event(claim, &event, 0); }
+    while (rc == 0 && strncmp(event.name, "game.", 5) == 0);
+    if (rc == 0)
     {
         Dmod_Printf("FAIL duplicate fuel event: %s\n", event.name);
         failures++;
@@ -235,10 +239,10 @@ int main(int argc, char** argv)
     expect("nav_map_near_x", compact ? -160 : -110);
     expect("nav_map_near_y", compact ? -364 : -332);
     /* Every page must remain reachable on the compact sidebar too. */
-    static const char pages[][8] = { "home", "nav", "media", "climate", "sounds" };
-    for (int i = 0; i < 5; i++)
+    static const char pages[][8] = { "home", "nav", "media", "climate", "sounds", "games" };
+    for (int i = 0; i < 6; i++)
     {
-        click(20, compact ? 51 + i * 40 : 54 + i * 48);
+        click(20, compact ? 46 + i * 34 : 48 + i * 40);
         now_ms += 1000;
         libdmview_update(view, now_ms);
         libdmview_render(view, &surface, NULL);
@@ -334,9 +338,9 @@ int main(int argc, char** argv)
         click(filler_x, filler_y); fuel_action(claim, &tank, "fuel.filler");
         click(filler_x, filler_y); fuel_action(claim, &tank, "fuel.filler");
         expect("fuel_stage", FUEL_PUMPING);
-        for (int page = 0; page < 5; page++)
+        for (int page = 0; page < 6; page++)
         {
-            click(20, compact ? 51 + page * 40 : 54 + page * 48);
+            click(20, compact ? 46 + page * 34 : 48 + page * 40);
             fuel_action(claim, &tank, "fuel.close");
             expect("fuel_panel_alpha", 0);
             expect("fuel_stage", FUEL_CAPPED);
@@ -346,8 +350,14 @@ int main(int argc, char** argv)
             char alpha[48];
             Dmod_SnPrintf(alpha, sizeof(alpha), "view_%s_alpha", pages[page]);
             expect(alpha, 255);
-            if (page < 4) { click(112, 12); fuel_action(claim, &tank, "fuel.open"); }
+            if (page < 5) { click(112, 12); fuel_action(claim, &tank, "fuel.open"); }
         }
+        /* Return from the new last page (Games) to the engine controls. */
+        click(20, compact ? 46 + 4 * 34 : 48 + 4 * 40);
+        now_ms += 1000; libdmview_update(view, now_ms);
+        libdmview_render(view, &surface, NULL);
+        expect("view_sounds_alpha", 255);
+        if (preview != NULL) save_frame(preview, "before-engine");
         /* Engine/fuel interlocks, driven by real compiled button clicks. */
         int engine_x = compact ? 110 : 150;
         click(engine_x, 140); fuel_action(claim, &tank, "engine");

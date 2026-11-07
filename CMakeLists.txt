@@ -43,6 +43,15 @@ dmod_setup_external_module()
 # turns them into the views (.dmv, .dmvf, .dmvi) at build time. The views are
 # too big for a microcontroller's flash, so they are a package of their own
 # (carhmi_view) that goes where the view should be - the SD card.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+execute_process(COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_literki.py
+    RESULT_VARIABLE LESSON_DATA_RESULT)
+if(NOT LESSON_DATA_RESULT EQUAL 0)
+    message(FATAL_ERROR "Cannot generate Literki vocabulary")
+endif()
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/games/literki/words.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_literki.py)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/carhmi_page.cmake)
 set(DMOD_ASSETS_SCREENS 480x272 320x240)
 foreach(SCREEN IN LISTS DMOD_ASSETS_SCREENS)
@@ -69,6 +78,18 @@ set(DMOD_MAL_IMPLS          )
 dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/carhmi_view.c
 )
+
+# Audio recordings stay next to the installed view, separate from music.
+file(GLOB LESSON_MP3_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/games/literki/audio/*.mp3")
+set(LESSON_AUDIO_COMMANDS)
+foreach(SCREEN IN LISTS DMOD_ASSETS_SCREENS)
+    list(APPEND LESSON_AUDIO_COMMANDS COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/prepare_literki_assets.py
+        ${CMAKE_BINARY_DIR}/views/${SCREEN} --audio)
+endforeach()
+add_custom_target(literki_audio_assets ${LESSON_AUDIO_COMMANDS} VERBATIM)
+add_dependencies(carhmi_view literki_audio_assets)
+set_property(TARGET carhmi_view APPEND PROPERTY LINK_DEPENDS ${LESSON_MP3_FILES})
 
 # Preserve the historical host-build path for tools that open the default view.
 # The package still contains only the separate, self-contained variant bundles.
@@ -104,6 +125,9 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/playstate.c
     src/sfx.c
     src/fuel.c
+    src/letters.c
+    src/games.c
+    src/lesson_audio.c
     src/sfx_synth.c
 )
 
