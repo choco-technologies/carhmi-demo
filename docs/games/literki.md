@@ -83,7 +83,7 @@ wymaga zwiększonego limitu klikalnych elementów (256 zamiast 64); klawiatura g
 przekraczała stary limit. Lokalna poprawka jest w
 `/data/codex/dmvs_html/src/script.c`. Zaktualizowano narzędzie w `build/todmvs/`.
 Przy przygotowaniu świeżego środowiska trzeba użyć tej wersji konwertera
-(`CARHMI_TOOLS_DIR`) lub nowszej z taką pojemnością. Efekty naciśnięcia
+(`DMOD_VIEWS_TOOLS_DIR`) lub nowszej z taką pojemnością. Efekty naciśnięcia
 wymagają też lokalnej poprawki łączenia `:active` z wyglądem zmienianym przez
 zestawy klas; pojemność stanów strony wynosi 512. Zmiana narzędzi konwertera
 unieważnia teraz cache konwersji strony.
