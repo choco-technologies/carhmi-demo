@@ -16,7 +16,7 @@ the view, the fonts (only the characters the view draws) and the images (at
 the sizes it draws them).
 
 The page requires `dmvs_js` and `dmvs_html` >= 0.4 and `dmvsi` and
-`libtodmvs` >= 0.8. Update cached tools in `CARHMI_TOOLS_DIR` together;
+`libtodmvs` >= 0.8. Update cached tools in `DMOD_VIEWS_TOOLS_DIR` together;
 older versions can silently omit properties or use incompatible document layouts.
 
 ## What the page may use
