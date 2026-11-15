@@ -24,8 +24,8 @@ function(carhmi_convert_page page screen element name outDir)
     dmod_convert_page("${page}"
         OUTPUT_DIR "${outDir}" NAME ${name} ROOT ${element} SIZE ${screen} QUIET
         DEPENDS "${LESSON_ASSETS}" "${NAVIGATION_BINDER}" "${NAVIGATION_GESTURES}" "${FUEL_BINDER}"
-        CONVERTED CONVERTED)
-    if(NOT CONVERTED)
+        CONVERTED PAGE_WAS_CONVERTED)
+    if(NOT PAGE_WAS_CONVERTED)
         return()
     endif()
 
